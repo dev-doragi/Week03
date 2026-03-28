@@ -1,4 +1,6 @@
-﻿using System;
+﻿// LEGACY: This script has been disabled to prevent compilation. Remove the surrounding #if/#endif to re-enable.
+#if false
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -169,3 +171,4 @@ public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         return Vector2Int.zero;
     }
 }
+#endif

@@ -1,3 +1,5 @@
+// LEGACY: This script has been disabled to prevent compilation. Remove the surrounding #if/#endif to re-enable.
+#if false
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -355,6 +357,7 @@ public class PropPlacementManager : MonoBehaviour
         return prop;
     }
 }
+#endif
 
 /// <summary>
 /// Where to start placing the prop ex. start at BottomLeft corner and search 

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4677ceca549c6d429a043aae74afab8, type: 3}
+  m_Name: SO_SMG
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSO
+  <AttackInterval>k__BackingField: 0.15
+  <Damage>k__BackingField: 1
+  <ProjectileSpeed>k__BackingField: 15
+  <ProjectileLifetime>k__BackingField: 0.75
+  <MaxAmmo>k__BackingField: 50
+  <ReloadDuration>k__BackingField: 2
+  <ProjectilePrefab>k__BackingField: {fileID: 5659828644058746940, guid: 30b8c9cd0c85fc1469becaab04a5223e, type: 3}
+  <SpreadAngle>k__BackingField: 0
+  <PelletCount>k__BackingField: 1
