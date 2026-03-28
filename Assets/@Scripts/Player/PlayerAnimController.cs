@@ -8,7 +8,11 @@ public class PlayerAnimController : MonoBehaviour
     [Header("Parameters")]
     [SerializeField] private string _isMovingParam = "IsMoving";
     [SerializeField] private string _isDashingParam = "IsDashing";
+    [SerializeField] private string _isBackwardMoveParam = "IsBackwardMove";
     [SerializeField] private string _deathTriggerParam = "Dead";
+
+    [Header("Backward Move")]
+    [SerializeField] private float _backwardThreshold = -0.1f;
 
     private PlayerController _controller;
 
@@ -19,6 +23,7 @@ public class PlayerAnimController : MonoBehaviour
         if (_animator == null)
             _animator = GetComponentInChildren<Animator>();
     }
+
     private void OnEnable()
     {
         _controller.OnDied += HandleDied;
@@ -34,8 +39,22 @@ public class PlayerAnimController : MonoBehaviour
         if (_animator == null)
             return;
 
-        _animator.SetBool(_isMovingParam, _controller.IsMoving);
-        _animator.SetBool(_isDashingParam, _controller.IsDashing);
+        bool isMoving = _controller.IsMoving;
+        bool isDashing = _controller.IsDashing;
+        bool isBackwardMove = false;
+
+        Vector2 moveInput = _controller.MoveInput;
+        Vector2 aimDirection = _controller.AimDirection;
+
+        if (isMoving && !isDashing && moveInput.sqrMagnitude > 0.001f && aimDirection.sqrMagnitude > 0.001f)
+        {
+            float dot = Vector2.Dot(moveInput.normalized, aimDirection.normalized);
+            isBackwardMove = dot < _backwardThreshold;
+        }
+
+        _animator.SetBool(_isMovingParam, isMoving);
+        _animator.SetBool(_isDashingParam, isDashing);
+        _animator.SetBool(_isBackwardMoveParam, isBackwardMove);
     }
 
     private void HandleDied()
@@ -45,6 +64,7 @@ public class PlayerAnimController : MonoBehaviour
 
         _animator.SetBool(_isMovingParam, false);
         _animator.SetBool(_isDashingParam, false);
+        _animator.SetBool(_isBackwardMoveParam, false);
         _animator.ResetTrigger(_deathTriggerParam);
         _animator.SetTrigger(_deathTriggerParam);
     }

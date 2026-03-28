@@ -73,7 +73,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2710113954224840486}
   - component: {fileID: 6736647837911849860}
-  - component: {fileID: 5213880154155412064}
+  - component: {fileID: 8453218921012721263}
   - component: {fileID: 7450199235088771399}
   - component: {fileID: 3166570431534823446}
   - component: {fileID: 5014335802329946053}
@@ -83,6 +83,7 @@ GameObject:
   - component: {fileID: 7321430739333096605}
   - component: {fileID: 8882870436773176198}
   - component: {fileID: 7028847737993541401}
+  - component: {fileID: 62471954421571731}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -134,8 +135,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!61 &5213880154155412064
-BoxCollider2D:
+--- !u!70 &8453218921012721263
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -164,22 +165,13 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 0.57, y: 0.88}
-  m_EdgeRadius: 0
+  m_Size: {x: 0.45, y: 0.95}
+  m_Direction: 0
 --- !u!114 &7450199235088771399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -306,7 +298,9 @@ MonoBehaviour:
   _animator: {fileID: 8841759998682215175}
   _isMovingParam: IsMoving
   _isDashingParam: IsDashing
+  _isBackwardMoveParam: IsBackwardMove
   _deathTriggerParam: Dead
+  _backwardThreshold: -0.1
 --- !u!114 &7028847737993541401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,6 +320,23 @@ MonoBehaviour:
   _hitColor: {r: 1, g: 1, b: 1, a: 1}
   _hitFlashDuration: 0.1
   _blinkInterval: 0.1
+--- !u!114 &62471954421571731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2658700659945703271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d024b6bfcf6952f4f96e1e8aa319ff7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AfterImage
+  _bodySpriteRenderer: {fileID: 2162814907605461657}
+  _spawnInterval: 0.06
+  _lifeTime: 0.15
+  _afterImageColor: {r: 1, g: 1, b: 1, a: 0.5}
+  _sortingOrderOffset: -1
 --- !u!1 &2670717195000243531
 GameObject:
   m_ObjectHideFlags: 0

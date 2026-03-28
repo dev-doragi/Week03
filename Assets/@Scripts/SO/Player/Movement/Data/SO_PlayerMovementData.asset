@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementSO
   <MoveSpeed>k__BackingField: 3
   <DashSpeed>k__BackingField: 9
-  <DashDuration>k__BackingField: 0.15
+  <DashDuration>k__BackingField: 0.2
   <DashCooldown>k__BackingField: 1.25
   <DashInvincible>k__BackingField: 1

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4677ceca549c6d429a043aae74afab8, type: 3}
   m_Name: SO_DefaultWeapon
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSO
-  <AttackInterval>k__BackingField: 0.65
+  <AttackInterval>k__BackingField: 0.35
   <Damage>k__BackingField: 1
-  <ProjectileSpeed>k__BackingField: 10
+  <ProjectileSpeed>k__BackingField: 13
   <ProjectileLifetime>k__BackingField: 2
   <MaxAmmo>k__BackingField: 6
   <ReloadDuration>k__BackingField: 1.5

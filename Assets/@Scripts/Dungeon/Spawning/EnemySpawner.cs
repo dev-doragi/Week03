@@ -27,17 +27,19 @@ public class EnemySpawner : MonoBehaviour
     private PoolManager _pool;
 
     private bool _isShuttingDown = false;
+    private bool _hasStarted = false;
     private readonly List<EnemyBase> _spawnedEnemies = new();
+
+    public bool HasStarted => _hasStarted;
 
     private void Awake()
     {
         ManagerRegistry.TryGet(out _pool);
+        SortWaveDatas();
     }
 
     private void Start()
     {
-        _waveDatas.Sort((a, b) => a.id.CompareTo(b.id));
-
         if (_autoStart)
         {
             StartFirstWave();
@@ -51,8 +53,42 @@ public class EnemySpawner : MonoBehaviour
         UnsubscribeAllEnemies();
     }
 
+    public void InitializeSpawnPoints(List<Transform> spawnPoints)
+    {
+        _spawnPoints.Clear();
+
+        if (spawnPoints == null)
+            return;
+
+        _spawnPoints.AddRange(spawnPoints);
+    }
+
+    public int GetMaxRequiredSpawnPointCount()
+    {
+        int maxCount = 0;
+
+        for (int i = 0; i < _waveDatas.Count; i++)
+        {
+            SO_WaveData waveData = _waveDatas[i];
+            if (waveData == null)
+                continue;
+
+            if (waveData.enemyPrefabs.Count > maxCount)
+            {
+                maxCount = waveData.enemyPrefabs.Count;
+            }
+        }
+
+        return maxCount;
+    }
+
     public void StartFirstWave()
     {
+        if (_hasStarted)
+            return;
+
+        _hasStarted = true;
+
         if (_isShuttingDown || !this)
             return;
 
@@ -63,6 +99,11 @@ public class EnemySpawner : MonoBehaviour
         }
 
         StartWave(0);
+    }
+
+    private void SortWaveDatas()
+    {
+        _waveDatas.Sort((a, b) => a.id.CompareTo(b.id));
     }
 
     public void StartWave(int waveIndex)
@@ -226,9 +267,7 @@ public class EnemySpawner : MonoBehaviour
             return;
 
         if (enemyPrefab == null || spawnPoint == null)
-        {
             return;
-        }
 
         GameObject enemyObject;
 
@@ -329,19 +368,4 @@ public class EnemySpawner : MonoBehaviour
             _spawnRoutine = null;
         }
     }
-
-    #region Editor Gizmos
-    private void OnDrawGizmosSelected()
-    {
-        if (_spawnPoints == null || _spawnPoints.Count == 0)
-            return;
-
-        Gizmos.color = Color.cyan;
-        foreach (var pt in _spawnPoints)
-        {
-            if (pt == null) continue;
-            Gizmos.DrawWireSphere(pt.position, 0.5f);
-        }
-    }
-    #endregion
 }
