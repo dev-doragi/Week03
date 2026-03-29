@@ -13,6 +13,8 @@ public class DungeonSpawnerBuilder : MonoBehaviour
 
     [Header("Spawner Prefab")]
     [SerializeField] private EnemySpawner _normalRoomSpawnerPrefab;
+    [SerializeField] private string _spawnTriggerLayerName = "Spawner";
+    [SerializeField] private float _triggerInset = 0.5f;
 
     [Header("Hierarchy")]
     [SerializeField] private Transform _encounterRoot;
@@ -25,17 +27,23 @@ public class DungeonSpawnerBuilder : MonoBehaviour
 
     private DungeonGenerator _dungeonGenerator;
     private readonly List<GameObject> _spawnedEncounterObjects = new();
+    private Transform _spawnTarget;
+    private readonly List<EnemySpawner> _spawnedSpawners = new();
 
     private void Awake()
     {
         _dungeonGenerator = GetComponent<DungeonGenerator>();
+        Debug.Log($"[SpawnerBuilder] Awake / Generator = {_dungeonGenerator}", this);
     }
 
     private void OnEnable()
     {
+        Debug.Log($"[SpawnerBuilder] OnEnable / Generator = {_dungeonGenerator}", this);
+
         if (_dungeonGenerator != null)
         {
             _dungeonGenerator.OnDungeonGenerated += HandleDungeonGenerated;
+            Debug.Log("[SpawnerBuilder] OnDungeonGenerated 구독 완료", this);
         }
     }
 
@@ -49,6 +57,13 @@ public class DungeonSpawnerBuilder : MonoBehaviour
 
     private void HandleDungeonGenerated(DungeonLayout layout)
     {
+        Debug.Log($"[DungeonSpawnerBuilder] HandleDungeonGenerated 호출 / layout null = {layout == null}", this);
+
+        if (layout != null)
+        {
+            Debug.Log($"[DungeonSpawnerBuilder] Room Count = {layout.Rooms.Count}", this);
+        }
+
         Build(layout);
     }
 
@@ -75,6 +90,20 @@ public class DungeonSpawnerBuilder : MonoBehaviour
         }
     }
 
+    public void SetSpawnTarget(Transform spawnTarget)
+    {
+        _spawnTarget = spawnTarget;
+
+        for (int i = 0; i < _spawnedSpawners.Count; i++)
+        {
+            EnemySpawner spawner = _spawnedSpawners[i];
+            if (spawner == null)
+                continue;
+
+            spawner.SetTarget(_spawnTarget);
+        }
+    }
+
     private void CreateNormalRoomEncounter(DungeonLayout layout, DungeonRoom room)
     {
         List<Vector2Int> candidates = CollectSpawnCandidates(layout, room);
@@ -95,6 +124,13 @@ public class DungeonSpawnerBuilder : MonoBehaviour
             Quaternion.identity,
             encounterObject.transform);
 
+        _spawnedSpawners.Add(spawner);
+
+        if (_spawnTarget != null)
+        {
+            spawner.SetTarget(_spawnTarget);
+        }
+
         List<Transform> spawnPoints = CreateSpawnPoints(spawner, encounterObject.transform, candidates);
         if (spawnPoints.Count == 0)
         {
@@ -105,11 +141,30 @@ public class DungeonSpawnerBuilder : MonoBehaviour
 
         spawner.InitializeSpawnPoints(spawnPoints);
 
-        SpawnTrigger trigger = encounterObject.AddComponent<SpawnTrigger>();
-        trigger.Initialize(spawner);
+        BoxCollider2D trigger = encounterObject.AddComponent<BoxCollider2D>();
 
-        BoxCollider2D triggerCollider = encounterObject.GetComponent<BoxCollider2D>();
-        ConfigureTriggerCollider(triggerCollider, room, encounterObject.transform);
+        int triggerLayer = LayerMask.NameToLayer(_spawnTriggerLayerName);
+        if (triggerLayer != -1)
+        {
+            encounterObject.layer = triggerLayer;
+        }
+        else
+        {
+            Debug.LogWarning($"Layer not found: {_spawnTriggerLayerName}", this);
+        }
+
+        trigger.isTrigger = true;
+
+        BoundsInt bounds = room.Bounds;
+
+        float width = Mathf.Max(0.1f, bounds.size.x - (_triggerInset * 2f));
+        float height = Mathf.Max(0.1f, bounds.size.y - (_triggerInset * 2f));
+
+        trigger.size = new Vector2(width, height);
+        trigger.offset = Vector2.zero;
+
+        SpawnTrigger spawnTrigger = encounterObject.AddComponent<SpawnTrigger>();
+        spawnTrigger.Initialize(spawner);
     }
 
     private List<Transform> CreateSpawnPoints(
@@ -325,6 +380,7 @@ public class DungeonSpawnerBuilder : MonoBehaviour
         }
 
         _spawnedEncounterObjects.Clear();
+        _spawnedSpawners.Clear();
     }
 
     private void Shuffle<T>(List<T> values)

@@ -5,15 +5,19 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 {
     [Header("Core Managers")]
     [SerializeField] private GameStateManager _gameStateManager;
-    //[SerializeField] private SceneFlowManager _sceneManager;
     [SerializeField] private PoolManager _poolManager;
-    [SerializeField] private InputManager _inputManager;
     [SerializeField] private PauseController _pauseController;
     [SerializeField] private HapticManager _hapticManager;
     [SerializeField] private UIManager _uiManager;
-    // TODO: Add EnemyManager etc.
+
+    [Header("Dungeon")]
+    [SerializeField] private DungeonGenerator _dungeonGenerator;
+    [SerializeField] private DungeonSpawnerBuilder _dungeonSpawnerBuilder;
 
     [SerializeField] private bool _autoStartInEditor = true;
+
+    private PlayerController _playerController;
+    private PlayerHealth _playerHealth;
 
     #region Debugging
     [ContextMenu("Debug Die")]
@@ -35,94 +39,63 @@ public class GameManager : PersistentMonoSingleton<GameManager>
     }
     #endregion
 
-    private Player _player;
-    private PlayerHealth _playerHealth;    // 게임 매니저는 플레이어의 체력을 감시
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        RegisterManagers(); // Awake에서 매니저 등록
+        RegisterManagers();
         InitializeManagers();
 
-        //_sceneManager.OnStageReloadCompleted += HandleStageReloadCompleted;
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        if (_dungeonGenerator != null)
+        {
+            _dungeonGenerator.OnDungeonGenerated += HandleDungeonGenerated;
+        }
+        else
+        {
+            Debug.LogWarning("DungeonGenerator is not assigned.");
+        }
+
+        if (_dungeonSpawnerBuilder == null)
+        {
+            _dungeonSpawnerBuilder = FindAnyObjectByType<DungeonSpawnerBuilder>();
+        }
+
+        BindPlayer();
 
         Debug.Log("GameManager Initialized");
+    }
 
+    private void Start()
+    {
+#if UNITY_EDITOR
+        if (_autoStartInEditor)
+        {
+            StartGame();
+        }
+#else
         StartGame();
-
-//#if UNITY_EDITOR
-//        if (_autoStartInEditor)
-//        {
-//            StartGame();
-//        }
-//#endif
+#endif
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        BindPlayerHealth();
+        BindPlayer();
     }
 
     private void OnDestroy()
     {
-        //if (_sceneManager != null)
-        //    _sceneManager.OnStageReloadCompleted -= HandleStageReloadCompleted;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
 
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
-        UnbindPlayerHealth();
-    }
-
-    private void BindPlayerHealth()
-    {
-        UnbindPlayerHealth();
-
-        _player = FindAnyObjectByType<Player>();
-        if (_player == null)
-            return;
-
-        _playerHealth = _player.playerHealth;
-        if (_playerHealth == null)
-            return;
-
-        _playerHealth.OnDie += HandlePlayerDie;
-    }
-
-    private void UnbindPlayerHealth()
-    {
-        if (_playerHealth == null)
-            return;
-
-        _playerHealth.OnDie -= HandlePlayerDie;
-        _playerHealth = null;
-    }
-
-    private void HandlePlayerDie()
-    {
-        Debug.Log("Player Die");
-
-        Player player = FindAnyObjectByType<Player>();
-        if (player != null)
+        if (_dungeonGenerator != null)
         {
-            Debug.Log("Player Disabled");
-            player.gameObject.SetActive(false);
-
-            // TODO: 죽는 애니메이션 재생 후 비활성화하는 방식으로 변경 필요
+            _dungeonGenerator.OnDungeonGenerated -= HandleDungeonGenerated;
         }
 
-        _inputManager.DisablePlayerInput();
-        //_inputManager.EnableUIInput();
-        Debug.Log("Input Disabled");
-
-        _gameStateManager.ChangeState(GameState.GameOver); // 게임 상태 변경 Invoke
-        Debug.Log("GameState -> GameOver");
-
-        Time.timeScale = 0f; // 게임 일시정지
-        Debug.Log("Time scaled set 0");
+        UnbindPlayer();
     }
 
-    // 매니저 등록은 Awake에서 진행
     private void RegisterManagers()
     {
         if (_gameStateManager == null)
@@ -131,21 +104,9 @@ public class GameManager : PersistentMonoSingleton<GameManager>
             return;
         }
 
-        //if (_sceneManager == null)
-        //{
-        //    Debug.LogError("SceneManager is not assigned!");
-        //    return;
-        //}
-
         if (_poolManager == null)
         {
             Debug.LogError("PoolManager is not assigned!");
-            return;
-        }
-
-        if (_inputManager == null)
-        {
-            Debug.LogError("InputManager is not assigned!");
             return;
         }
 
@@ -170,20 +131,15 @@ public class GameManager : PersistentMonoSingleton<GameManager>
         ManagerRegistry.Register<GameManager>(this);
         ManagerRegistry.Register<GameStateManager>(_gameStateManager);
         ManagerRegistry.Register<PoolManager>(_poolManager);
-        ManagerRegistry.Register<InputManager>(_inputManager);
-        //ManagerRegistry.Register<SceneFlowManager>(_sceneManager);
         ManagerRegistry.Register<PauseController>(_pauseController);
         ManagerRegistry.Register<HapticManager>(_hapticManager);
         ManagerRegistry.Register<UIManager>(_uiManager);
     }
 
-    // 매니저 초기화는 여기서 진행
     private void InitializeManagers()
     {
         Initialize(_gameStateManager);
         Initialize(_poolManager);
-        Initialize(_inputManager);
-        //Initialize(_sceneManager);
         Initialize(_pauseController);
         Initialize(_hapticManager);
         Initialize(_uiManager);
@@ -191,75 +147,173 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
     private void Initialize(IInitializable manager)
     {
-        if (manager == null) return;
+        if (manager == null)
+            return;
 
         if (!manager.IsInitialized)
             manager.Initialize();
     }
 
-    public void StartGame()
+    private void BindPlayer()
     {
-        //if (_sceneManager == null)
-        //{
-        //    Debug.LogError("SceneFlowManager is missing!");
-        //    return;
-        //}
+        UnbindPlayer();
 
-        Debug.Log("Game Start!");
+        _playerController = FindAnyObjectByType<PlayerController>();
+        if (_playerController == null)
+            return;
 
-        Time.timeScale = 1f;
-        _inputManager.EnablePlayerInput();
-        //_inputManager.EnableUIInput();
+        _playerHealth = _playerController.GetComponent<PlayerHealth>();
+        if (_playerHealth == null)
+            return;
 
-        _gameStateManager.ChangeState(GameState.Playing);
+        if (_dungeonSpawnerBuilder != null && _playerController != null)
+        {
+            _dungeonSpawnerBuilder.SetSpawnTarget(_playerController.transform);
+        }
 
-        Scene activeScene = SceneManager.GetActiveScene();
-        //_sceneManager.SetCurrentStage(activeScene.name);
+        _playerHealth.OnDie += HandlePlayerDie;
     }
 
-    // 다시 시작 (마지막 체크포인트로)
-    public void RestartGame()
+    private void UnbindPlayer()
     {
-        if (_player == null)
+        if (_playerHealth == null)
+            return;
+
+        _playerHealth.OnDie -= HandlePlayerDie;
+        _playerHealth = null;
+        _playerController = null;
+    }
+
+    public void StartGame()
+    {
+        BeginRunSetup();
+    }
+
+    public void BeginRunSetup()
+    {
+        if (_dungeonGenerator == null)
         {
-            Debug.LogWarning("Player not found.");
+            Debug.LogError("DungeonGenerator is missing!");
             return;
         }
 
-        PlayerHealth playerHealth = _player.playerHealth;
-        if (playerHealth == null)
+        Debug.Log("Run Setup Begin");
+
+        Time.timeScale = 1f;
+        SetPlayerControlEnabled(false);
+        _gameStateManager.ChangeState(GameState.Loading);
+
+        _dungeonGenerator.GenerateDungeon();
+    }
+
+    private void HandleDungeonGenerated(DungeonLayout layout)
+    {
+        BindPlayer();
+
+        if (_playerController == null)
+        {
+            Debug.LogError("PlayerController not found after dungeon generation.");
+            return;
+        }
+
+        if (_playerHealth == null)
+        {
+            Debug.LogError("PlayerHealth not found after dungeon generation.");
+            return;
+        }
+
+        if (_uiManager != null)
+        {
+            Debug.Log("Rebinding UI");
+            _uiManager.RebindUI();
+        }
+
+        Vector3 spawnPosition = GetPlayerSpawnPosition();
+
+        _playerController.transform.position = spawnPosition;
+        _playerController.transform.rotation = Quaternion.identity;
+
+        Rigidbody2D rigidbody2D = _playerController.Rigidbody;
+        if (rigidbody2D != null)
+        {
+            rigidbody2D.linearVelocity = Vector2.zero;
+            rigidbody2D.angularVelocity = 0f;
+        }
+
+        _playerController.ResetRuntimeState();
+        _playerHealth.ResetHp();
+        _playerController.gameObject.SetActive(true);
+
+
+        SetPlayerControlEnabled(true);
+        _gameStateManager.ChangeState(GameState.Playing);
+
+        Debug.Log("Dungeon generated and player initialized.");
+    }
+
+    private Vector3 GetPlayerSpawnPosition()
+    {
+        if (_dungeonGenerator == null)
+            return Vector3.zero;
+
+        Vector2Int spawnTile = _dungeonGenerator.PlayerSpawnTile;
+        return new Vector3(spawnTile.x + 0.5f, spawnTile.y + 0.5f, 0f);
+    }
+
+    private void HandlePlayerDie()
+    {
+        Debug.Log("Player Die");
+
+        SetPlayerControlEnabled(false);
+
+        if (_playerController != null)
+        {
+            _playerController.gameObject.SetActive(false);
+            Debug.Log("Player Disabled");
+        }
+
+        _gameStateManager.ChangeState(GameState.GameOver);
+        Debug.Log("GameState -> GameOver");
+
+        Time.timeScale = 0f;
+        Debug.Log("Time scaled set 0");
+    }
+
+    private void SetPlayerControlEnabled(bool enabled)
+    {
+        if (_playerController == null)
+            return;
+
+        _playerController.SetControlEnabled(enabled);
+    }
+
+    public void RestartGame()
+    {
+        if (_playerController == null)
+        {
+            Debug.LogWarning("PlayerController not found.");
+            return;
+        }
+
+        if (_playerHealth == null)
         {
             Debug.LogWarning("PlayerHealth not found.");
             return;
         }
 
-        Rigidbody2D rb = _player.GetComponent<Rigidbody2D>();
-        if (rb != null)
+        Rigidbody2D rigidbody2D = _playerController.Rigidbody;
+        if (rigidbody2D != null)
         {
-            rb.linearVelocity = Vector2.zero;
-            rb.angularVelocity = 0f;
+            rigidbody2D.linearVelocity = Vector2.zero;
+            rigidbody2D.angularVelocity = 0f;
         }
 
-        _player.ResetState();
-        //_player.playerCombat.ResetState();
-        _player.CanJump = true;
+        _playerController.ResetRuntimeState();
+        _playerHealth.ResetHp();
 
-        playerHealth.ResetHp();
+        _playerController.gameObject.SetActive(true);
 
-        _player.gameObject.SetActive(true); // 플레이어 다시 활성화
-
-        _inputManager.EnablePlayerInput();
-        _gameStateManager.ChangeState(GameState.Playing);
-    }
-
-    private void HandleStageReloadCompleted(string stageName)
-    {
-        Debug.Log($"Stage Reload Completed: {stageName}");
-
-        BindPlayerHealth();
-        _uiManager?.RebindUI();
-
-        _inputManager.EnablePlayerInput();
+        SetPlayerControlEnabled(true);
         _gameStateManager.ChangeState(GameState.Playing);
     }
 }

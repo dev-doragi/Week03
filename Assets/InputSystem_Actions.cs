@@ -1004,7 +1004,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             ]
         },
         {
-            ""name"": ""Pause"",
+            ""name"": ""System"",
             ""id"": ""2f3d15b9-7480-46f8-a921-55eab62c08a8"",
             ""actions"": [
                 {
@@ -1117,16 +1117,16 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_UI_ScrollWheel = m_UI.FindAction("ScrollWheel", throwIfNotFound: true);
         m_UI_TrackedDevicePosition = m_UI.FindAction("TrackedDevicePosition", throwIfNotFound: true);
         m_UI_TrackedDeviceOrientation = m_UI.FindAction("TrackedDeviceOrientation", throwIfNotFound: true);
-        // Pause
-        m_Pause = asset.FindActionMap("Pause", throwIfNotFound: true);
-        m_Pause_Pause = m_Pause.FindAction("Pause", throwIfNotFound: true);
+        // System
+        m_System = asset.FindActionMap("System", throwIfNotFound: true);
+        m_System_Pause = m_System.FindAction("Pause", throwIfNotFound: true);
     }
 
     ~@InputSystem_Actions()
     {
         UnityEngine.Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, InputSystem_Actions.Player.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, InputSystem_Actions.UI.Disable() has not been called.");
-        UnityEngine.Debug.Assert(!m_Pause.enabled, "This will cause a leak and performance issues, InputSystem_Actions.Pause.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_System.enabled, "This will cause a leak and performance issues, InputSystem_Actions.System.Disable() has not been called.");
     }
 
     /// <summary>
@@ -1567,29 +1567,29 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     /// </summary>
     public UIActions @UI => new UIActions(this);
 
-    // Pause
-    private readonly InputActionMap m_Pause;
-    private List<IPauseActions> m_PauseActionsCallbackInterfaces = new List<IPauseActions>();
-    private readonly InputAction m_Pause_Pause;
+    // System
+    private readonly InputActionMap m_System;
+    private List<ISystemActions> m_SystemActionsCallbackInterfaces = new List<ISystemActions>();
+    private readonly InputAction m_System_Pause;
     /// <summary>
-    /// Provides access to input actions defined in input action map "Pause".
+    /// Provides access to input actions defined in input action map "System".
     /// </summary>
-    public struct PauseActions
+    public struct SystemActions
     {
         private @InputSystem_Actions m_Wrapper;
 
         /// <summary>
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
-        public PauseActions(@InputSystem_Actions wrapper) { m_Wrapper = wrapper; }
+        public SystemActions(@InputSystem_Actions wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "Pause/Pause".
+        /// Provides access to the underlying input action "System/Pause".
         /// </summary>
-        public InputAction @Pause => m_Wrapper.m_Pause_Pause;
+        public InputAction @Pause => m_Wrapper.m_System_Pause;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
-        public InputActionMap Get() { return m_Wrapper.m_Pause; }
+        public InputActionMap Get() { return m_Wrapper.m_System; }
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
         public void Enable() { Get().Enable(); }
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
@@ -1597,9 +1597,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
         public bool enabled => Get().enabled;
         /// <summary>
-        /// Implicitly converts an <see ref="PauseActions" /> to an <see ref="InputActionMap" /> instance.
+        /// Implicitly converts an <see ref="SystemActions" /> to an <see ref="InputActionMap" /> instance.
         /// </summary>
-        public static implicit operator InputActionMap(PauseActions set) { return set.Get(); }
+        public static implicit operator InputActionMap(SystemActions set) { return set.Get(); }
         /// <summary>
         /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
         /// </summary>
@@ -1607,11 +1607,11 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <remarks>
         /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
         /// </remarks>
-        /// <seealso cref="PauseActions" />
-        public void AddCallbacks(IPauseActions instance)
+        /// <seealso cref="SystemActions" />
+        public void AddCallbacks(ISystemActions instance)
         {
-            if (instance == null || m_Wrapper.m_PauseActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_PauseActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_SystemActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_SystemActionsCallbackInterfaces.Add(instance);
             @Pause.started += instance.OnPause;
             @Pause.performed += instance.OnPause;
             @Pause.canceled += instance.OnPause;
@@ -1623,8 +1623,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <remarks>
         /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
         /// </remarks>
-        /// <seealso cref="PauseActions" />
-        private void UnregisterCallbacks(IPauseActions instance)
+        /// <seealso cref="SystemActions" />
+        private void UnregisterCallbacks(ISystemActions instance)
         {
             @Pause.started -= instance.OnPause;
             @Pause.performed -= instance.OnPause;
@@ -1632,12 +1632,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         }
 
         /// <summary>
-        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="PauseActions.UnregisterCallbacks(IPauseActions)" />.
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="SystemActions.UnregisterCallbacks(ISystemActions)" />.
         /// </summary>
-        /// <seealso cref="PauseActions.UnregisterCallbacks(IPauseActions)" />
-        public void RemoveCallbacks(IPauseActions instance)
+        /// <seealso cref="SystemActions.UnregisterCallbacks(ISystemActions)" />
+        public void RemoveCallbacks(ISystemActions instance)
         {
-            if (m_Wrapper.m_PauseActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_SystemActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
@@ -1647,21 +1647,21 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <remarks>
         /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
         /// </remarks>
-        /// <seealso cref="PauseActions.AddCallbacks(IPauseActions)" />
-        /// <seealso cref="PauseActions.RemoveCallbacks(IPauseActions)" />
-        /// <seealso cref="PauseActions.UnregisterCallbacks(IPauseActions)" />
-        public void SetCallbacks(IPauseActions instance)
+        /// <seealso cref="SystemActions.AddCallbacks(ISystemActions)" />
+        /// <seealso cref="SystemActions.RemoveCallbacks(ISystemActions)" />
+        /// <seealso cref="SystemActions.UnregisterCallbacks(ISystemActions)" />
+        public void SetCallbacks(ISystemActions instance)
         {
-            foreach (var item in m_Wrapper.m_PauseActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_SystemActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_PauseActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_SystemActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
     /// <summary>
-    /// Provides a new <see cref="PauseActions" /> instance referencing this action map.
+    /// Provides a new <see cref="SystemActions" /> instance referencing this action map.
     /// </summary>
-    public PauseActions @Pause => new PauseActions(this);
+    public SystemActions @System => new SystemActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     /// <summary>
     /// Provides access to the input control scheme.
@@ -1870,11 +1870,11 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         void OnTrackedDeviceOrientation(InputAction.CallbackContext context);
     }
     /// <summary>
-    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Pause" which allows adding and removing callbacks.
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "System" which allows adding and removing callbacks.
     /// </summary>
-    /// <seealso cref="PauseActions.AddCallbacks(IPauseActions)" />
-    /// <seealso cref="PauseActions.RemoveCallbacks(IPauseActions)" />
-    public interface IPauseActions
+    /// <seealso cref="SystemActions.AddCallbacks(ISystemActions)" />
+    /// <seealso cref="SystemActions.RemoveCallbacks(ISystemActions)" />
+    public interface ISystemActions
     {
         /// <summary>
         /// Method invoked when associated input action "Pause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.

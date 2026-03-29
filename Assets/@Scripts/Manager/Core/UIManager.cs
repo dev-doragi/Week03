@@ -39,15 +39,25 @@ public class UIManager : MonoBehaviour, IInitializable
 
     public void RebindUI()
     {
-        Player player = FindAnyObjectByType<Player>();
-
         if (_uiHud != null)
         {
             _uiHud.Unbind();
-            _uiHud.Bind(player);
         }
 
-        HideOverlayPanels();
+        PlayerController playerController = FindAnyObjectByType<PlayerController>();
+        if (playerController == null)
+        {
+            Debug.LogWarning("UIManager.RebindUI: PlayerController not found.");
+            return;
+        }
+
+        PlayerHealth playerHealth = playerController.GetComponent<PlayerHealth>();
+        PlayerCombat playerCombat = playerController.GetComponent<PlayerCombat>();
+
+        if (_uiHud != null)
+        {
+            _uiHud.Bind(playerHealth, playerCombat);
+        }
     }
 
     private void BindPanelEvents()

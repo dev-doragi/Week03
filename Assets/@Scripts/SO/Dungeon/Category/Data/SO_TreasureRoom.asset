@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BasicRoomAssignerSO
   _targetRoomType: 2
   _selectPolicy: 2
-  _minRoomSize: {x: 3, y: 3}
-  _maxRoomSize: {x: 15, y: 15}
+  _minRoomSize: {x: 17, y: 17}
+  _maxRoomSize: {x: 20, y: 20}
   _excludeStartRoom: 1
   _onlyNormalRoom: 1

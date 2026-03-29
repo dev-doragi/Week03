@@ -45,7 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   _waveDatas:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: c45fd215d56a32d47ba6003b796fd3d2, type: 2}
+  - {fileID: 11400000, guid: 1d83da41681c23c449fdc067404d8a18, type: 2}
   _blocks: []
   _spawnPoints: []
   _autoStart: 0

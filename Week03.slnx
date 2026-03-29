@@ -1,6 +1,6 @@
 ﻿<Solution>
-  <Project Path="FastScriptReload.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="FastScriptReload.Editor.csproj" />
   <Project Path="VHierarchy.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
   <Project Path="VInspector.csproj" />

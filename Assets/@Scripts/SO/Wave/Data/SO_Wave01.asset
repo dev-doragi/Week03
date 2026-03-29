@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: SO_Wave01
   m_EditorClassIdentifier: Assembly-CSharp::SO_WaveData
   id: 0
-  enemyPrefabs: []
+  enemyPrefabs:
+  - {fileID: 1494735616084423367, guid: 7d2801527192fb54398448a818f5db56, type: 3}
+  - {fileID: 1494735616084423367, guid: 7d2801527192fb54398448a818f5db56, type: 3}
+  - {fileID: 1494735616084423367, guid: 7d2801527192fb54398448a818f5db56, type: 3}
   spawnSequentially: 0
   spawnInterval: 0.2
   isBossWave: 0

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SO_PlayerMovementData", menuName = "SO/Player/SO_PlayerMovementData")]
+[CreateAssetMenu(fileName = "SO_PlayerMovementData", menuName = "Scriptable Objects/Player/Movement")]
 public class PlayerMovementSO : ScriptableObject
 {
     [field: Header("Move")]

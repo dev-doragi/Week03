@@ -13,12 +13,18 @@ public class PlayerInputReader : MonoBehaviour
     private const string RELOAD_ACTION = "Reload";
     private const string GAMEPAD_SCHEME = "Gamepad";
 
+
+    private const string SYSTEM_ACTION_MAP = "System";
+    private const string PAUSE_ACTION = "Pause";
+
     private PlayerInput _playerInput;
     private InputAction _moveAction;
     private InputAction _lookAction;
     private InputAction _attackAction;
     private InputAction _dashAction;
     private InputAction _reloadAction;
+
+    private InputAction _pauseAction;
 
     public bool IsGamepadScheme =>
         string.Equals(_playerInput.currentControlScheme, GAMEPAD_SCHEME, StringComparison.Ordinal);
@@ -33,6 +39,9 @@ public class PlayerInputReader : MonoBehaviour
         _attackAction = playerActionMap.FindAction(ATTACK_ACTION, true);
         _dashAction = playerActionMap.FindAction(DASH_ACTION, true);
         _reloadAction = playerActionMap.FindAction(RELOAD_ACTION, true);
+
+        InputActionMap systemActionMap = _playerInput.actions.FindActionMap(SYSTEM_ACTION_MAP, true);
+        _pauseAction = systemActionMap.FindAction(PAUSE_ACTION, true);
     }
 
     public Vector2 ReadMove()
@@ -58,5 +67,10 @@ public class PlayerInputReader : MonoBehaviour
     public bool WasReloadPressedThisFrame()
     {
         return _reloadAction.WasPressedThisFrame();
+    }
+
+    public bool WasPausePressedThisFrame()
+    {
+        return _pauseAction.WasPressedThisFrame();
     }
 }

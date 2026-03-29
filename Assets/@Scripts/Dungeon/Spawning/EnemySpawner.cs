@@ -21,13 +21,12 @@ public class EnemySpawner : MonoBehaviour
     private int _currentWaveKilledCount = 0;
     private bool _isWaveSpawnCompleted;
     private bool _isChangingWave = false;
-
     private int _currentWaveIndex = -1;
     private Coroutine _spawnRoutine;
     private PoolManager _pool;
-
     private bool _isShuttingDown = false;
     private bool _hasStarted = false;
+    private Transform _target;
     private readonly List<EnemyBase> _spawnedEnemies = new();
 
     public bool HasStarted => _hasStarted;
@@ -51,6 +50,19 @@ public class EnemySpawner : MonoBehaviour
         _isShuttingDown = true;
         ClearWaveRoutine();
         UnsubscribeAllEnemies();
+    }
+
+    public void SetTarget(Transform target)
+    {
+        _target = target;
+
+        for (int i = 0; i < _spawnedEnemies.Count; i++)
+        {
+            if (_spawnedEnemies[i] != null)
+            {
+                _spawnedEnemies[i].SetTarget(_target);
+            }
+        }
     }
 
     public void InitializeSpawnPoints(List<Transform> spawnPoints)
@@ -289,6 +301,7 @@ public class EnemySpawner : MonoBehaviour
         EnemyBase enemyBase = enemyObject.GetComponent<EnemyBase>();
         if (enemyBase != null)
         {
+            enemyBase.SetTarget(_target);
             enemyBase.OnDeathFinished -= HandleEnemyDeathFinished;
             enemyBase.OnDeathFinished += HandleEnemyDeathFinished;
 

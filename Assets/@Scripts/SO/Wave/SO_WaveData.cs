@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SO_WaveData", menuName = "Scriptable Objects/SO_WaveData")]
+[CreateAssetMenu(fileName = "SO_WaveData", menuName = "Scriptable Objects/Wave/Wave Data")]
 public class SO_WaveData : ScriptableObject
 {
     public int id;

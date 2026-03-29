@@ -212,7 +212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0d98dac412e41349a5b8cbb83c456b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI_HpBar
-  _playerHealth: {fileID: 0}
+  _playerHealth: {fileID: 7028847737993541401, guid: 838eacc9bc9cce841addaa4be065c950, type: 3}
   _bar: {fileID: 3673001201603570910}
   _filledHeartPrefab: {fileID: 3997870592411399815, guid: e4fd641ab75e604419e5216dba6179b7, type: 3}
   _emptyHeartPrefab: {fileID: 3021337542212143725, guid: edd3c2145d6d01248b76bb02c92199f8, type: 3}
@@ -366,6 +366,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2915346705768428196}
+  - component: {fileID: 868776956859789187}
   m_Layer: 5
   m_Name: HUD
   m_TagString: Untagged
@@ -394,6 +395,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &868776956859789187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7908095554552898834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c341ddde16e35345b4ef2f5169468e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI_HUD
+  _hpBar: {fileID: 4067435803527000816}
+  _weaponAmmo: {fileID: 3347280600117232227}
 --- !u!1 &7952699194022711588
 GameObject:
   m_ObjectHideFlags: 0
@@ -444,6 +459,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e79ae53b43aef04da2f7107e00faaf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI_WeaponAmmo
-  _playerCombat: {fileID: 0}
+  _playerCombat: {fileID: 7321430739333096605, guid: 838eacc9bc9cce841addaa4be065c950, type: 3}
   _ammoText: {fileID: 8205027417856763902}
   _reloadText: {fileID: 7895280935326549558}

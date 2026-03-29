@@ -5,16 +5,13 @@ public class UI_HUD : MonoBehaviour
     [SerializeField] private UI_HpBar _hpBar;
     [SerializeField] private UI_WeaponAmmo _weaponAmmo;
 
-    public void Bind(Player player)
+    public void Bind(PlayerHealth playerHealth, PlayerCombat playerCombat)
     {
-        if (player == null)
-            return;
-
         if (_hpBar != null)
-            _hpBar.Bind(player.playerHealth);
+            _hpBar.Bind(playerHealth);
 
         if (_weaponAmmo != null)
-            _weaponAmmo.Bind(player.playerCombat);
+            _weaponAmmo.Bind(playerCombat);
     }
 
     public void Unbind()

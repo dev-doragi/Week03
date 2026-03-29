@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6157a1bf167cbb1468810226c63bb801, type: 3}
   m_Name: SO_PlayerMovementData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementSO
-  <MoveSpeed>k__BackingField: 3
+  <MoveSpeed>k__BackingField: 5
   <DashSpeed>k__BackingField: 9
   <DashDuration>k__BackingField: 0.2
   <DashCooldown>k__BackingField: 1.25

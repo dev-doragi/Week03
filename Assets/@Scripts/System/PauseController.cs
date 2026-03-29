@@ -4,7 +4,6 @@ public class PauseController : MonoBehaviour, IInitializable
 {
     public bool IsInitialized { get; private set; }
 
-    private InputManager _inputManager;
     private GameStateManager _gameStateManager;
 
     public void Initialize()
@@ -12,16 +11,13 @@ public class PauseController : MonoBehaviour, IInitializable
         if (IsInitialized)
             return;
 
-        ManagerRegistry.TryGet(out _inputManager);
         ManagerRegistry.TryGet(out _gameStateManager);
 
-        if (_inputManager == null || _gameStateManager == null)
+        if (_gameStateManager == null)
         {
             Debug.LogError($"{name}: PauseController Initialize failed.");
             return;
         }
-
-        _inputManager.OnPause += HandlePauseInput;
 
         IsInitialized = true;
     }
@@ -49,8 +45,6 @@ public class PauseController : MonoBehaviour, IInitializable
     public void PauseGame()
     {
         Time.timeScale = 0f;
-        _inputManager.DisablePlayerInput();
-        _inputManager.EnableUIInput();
 
         _gameStateManager.ChangeState(GameState.Paused);
 
@@ -60,8 +54,6 @@ public class PauseController : MonoBehaviour, IInitializable
     public void ResumeGame()
     {
         Time.timeScale = 1f;
-        _inputManager.EnablePlayerInput();
-        _inputManager.DisableUIInput();
 
         _gameStateManager.ChangeState(GameState.Playing);
 
@@ -70,11 +62,6 @@ public class PauseController : MonoBehaviour, IInitializable
 
     private void OnDestroy()
     {
-        if (_inputManager != null)
-        {
-            _inputManager.OnPause -= HandlePauseInput;
-        }
-
         if (Time.timeScale == 0f)
         {
             Time.timeScale = 1f;

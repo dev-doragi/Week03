@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SO_RoomAssignRule", menuName = "Dungeon/Room Assigner/Assign Rule")]
+    [CreateAssetMenu(fileName = "SO_BasicRoomAssignRule", menuName = "Scriptable Objects/Dungeon/Room Assigner/Basic Room Assign Rule")]
 public class BasicRoomAssignerSO : RoomAssignerSOBase
 {
     [SerializeField] private RoomType _targetRoomType = RoomType.Normal;

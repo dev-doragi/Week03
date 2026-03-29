@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SO_WeaponData", menuName = "SO/Player/Weapon")]
+[CreateAssetMenu(fileName = "SO_WeaponData", menuName = "Scriptable Objects/Player/Weapon")]
 public class WeaponSO : ScriptableObject
 {
     [field: SerializeField] public float AttackInterval { get; private set; } = 0.12f;

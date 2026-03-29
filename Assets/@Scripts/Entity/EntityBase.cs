@@ -1,51 +1,76 @@
+using System;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public abstract class EntityBase : MonoBehaviour, IDamageable
 {
-    // =====================
-    // 공통 스탯
-    // =====================
-    [SerializeField] protected int _maxHp = 5;
-    [SerializeField] protected int _attackDamage = 1;
-
-    protected int _currentHp;
     protected Rigidbody2D _rb;
 
-    // =====================
-    // 프로퍼티
-    // =====================
-    public int CurrentHp => _currentHp;
-    public int MaxHp => _maxHp;
+    public int CurrentHp { get; private set; }
+    public int MaxHp => GetMaxHp();
+    public bool IsDead { get; private set; }
 
-    // =====================
-    // 생명주기
-    // =====================
-    protected virtual void Start()
+    public event Action<int> OnDamaged;
+    public event Action OnDied;
+
+    protected virtual void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
-        Initialize();
     }
 
-    protected virtual void Initialize()
+    protected virtual void OnEnable()
     {
-        _currentHp = _maxHp;
+        ResetEntityState();
     }
 
-    // =====================
-    // IDamageable 구현
-    // =====================
+    protected abstract int GetMaxHp();
+
+    protected virtual void ResetEntityState()
+    {
+        CurrentHp = Mathf.Max(1, GetMaxHp());
+        IsDead = false;
+
+        if (_rb != null)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            _rb.angularVelocity = 0f;
+        }
+    }
+
     public virtual void TakeDamage(int damage)
     {
-        if (_currentHp <= 0) return;
+        if (IsDead)
+            return;
 
-        _currentHp -= damage;
+        if (damage <= 0)
+            return;
 
-        if (_currentHp <= 0)
+        CurrentHp = Mathf.Max(0, CurrentHp - damage);
+        OnDamaged?.Invoke(damage);
+        HandleDamaged(damage);
+
+        if (CurrentHp == 0)
         {
-            _currentHp = 0;
             Die();
         }
     }
 
-    public virtual void Die() { }
+    protected virtual void HandleDamaged(int damage)
+    {
+    }
+
+    protected bool EnterDeathState()
+    {
+        if (IsDead)
+            return false;
+
+        IsDead = true;
+        OnDied?.Invoke();
+        return true;
+    }
+
+    public virtual void Die()
+    {
+        EnterDeathState();
+    }
 }

@@ -11,7 +11,7 @@ public enum PlacementMode
 }
 
 [CreateAssetMenu(
-    fileName = "SO_",
+    fileName = "SO_PropPlacement",
     menuName = "Dungeon/Prop Placement")]
 public class PropPlacementSO : ScriptableObject
 {

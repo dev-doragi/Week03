@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fef0a6249324994aa7b7565167acdf4, type: 3}
+  m_Name: SO_MeleeEnemy01
+  m_EditorClassIdentifier: Assembly-CSharp::SO_MeleeEnemyData
+  _maxHp: 4
+  _attackDamage: 1
+  _moveSpeed: 2
+  _detectionRange: 8
+  _attackRange: 1.5
+  _attackCooldown: 1.2
+  _deathDespawnDelay: 0.35
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _enemyMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _separationRadius: 0.7
+  _separationWeight: 0.8
+  _hitSprite: {fileID: 7985253371725656092, guid: 0026b8ecd529df640bf23d625fb6f515, type: 3}
+  _deathSprite: {fileID: -7744949661944355022, guid: 0026b8ecd529df640bf23d625fb6f515, type: 3}
+  _hitSpriteDuration: 0.08
+  _flipThreshold: 0.01
+  _attackRadius: 0.75
+  _attackWindup: 0.12
+  _targetMask:
+    serializedVersion: 2
+    m_Bits: 8
+  _slashEffectPrefab: {fileID: 2958273270267055162, guid: eb1925deb49fe9044bb0757f6da10fe8, type: 3}
+  _slashEffectLifetime: 0.2
+  _slashAngleOffset: 0

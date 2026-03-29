@@ -12,6 +12,8 @@ public abstract class AbstractDungeonGenerator : MonoBehaviour
 
     public void GenerateDungeon()
     {
+        Debug.Log($"[DungeonGenerator] GenerateDungeon 호출 / name = {name}", this);
+
         _tilemapVisualizer.Clear();
         RunProceduralGeneration();
     }

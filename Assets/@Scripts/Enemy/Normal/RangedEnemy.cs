@@ -1,142 +1,71 @@
 using System.Collections;
 using UnityEngine;
 
-public class RangedEnemy : NormalEnemyBase
+public class RangedEnemy : EnemyBase
 {
-    [SerializeField] protected GameObject _projectilePrefab;
-    [SerializeField] protected float _projectileSpeed = 8f;
-    [SerializeField] protected float _retreatRange = 2f;
-    [SerializeField] protected float _preferredRange = 4f;
-    [SerializeField] protected Transform _gunPivot;
+    [SerializeField] private Transform _firePoint;
 
-    [Header("연사 설정")]
-    [SerializeField] private int _burstCount = 1;
-    [SerializeField] private float _burstInterval = 0.15f;
+    protected SO_RangedEnemyData RangedData => EnemyData as SO_RangedEnemyData;
 
-    protected PoolManager _pool;
-    private bool _isBursting = false;
-
-    protected override void Start()
+    protected override void TickCombat(float distance)
     {
-        base.Start();
-        ManagerRegistry.TryGet(out _pool);
-    }
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        _isBursting = false;
-    }
-
-    protected override void Update()
-    {
-        if (_isDead || !CanAct()) return;
-
-        if (!TryFindPlayer())
+        if (RangedData == null)
         {
-            _rb.linearVelocity = Vector2.zero;
-            Patrol();
+            StopMovement();
+            SetRunAnimation(false);
             return;
         }
 
-        bool detecting = DetectPlayer();
-
-        if (detecting)
+        if (_isAttacking)
         {
-            _wasDetecting = true;
+            StopMovement();
+            SetRunAnimation(false);
+            return;
+        }
 
-            float dist = Vector2.Distance(transform.position, _player.position);
-
-            // 총구 방향 (발사 중 고정)
-            if (_gunPivot != null && !_isBursting)
-            {
-                Vector2 aimDir = ((Vector2)_player.position - (Vector2)transform.position).normalized;
-                _gunPivot.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg);
-            }
-
-            if (!_isBursting)
-            {
-                if (dist <= _retreatRange)
-                {
-                    Vector2 retreatDir = ((Vector2)transform.position - (Vector2)_player.position).normalized;
-                    MoveToward((Vector2)transform.position + retreatDir);
-                }
-                else if (dist <= _attackRange)
-                {
-                    _rb.linearVelocity = Vector2.zero;
-                }
-                else if (dist <= _preferredRange)
-                {
-                    _rb.linearVelocity = Vector2.zero;
-                }
-                else
-                {
-                    MoveToward(_player.position);
-                }
-            }
-            else
-            {
-                _rb.linearVelocity = Vector2.zero;
-            }
-
-            if (dist <= _attackRange && _canAttack)
-                StartCoroutine(AttackRoutine());
+        if (distance < RangedData.RetreatRange)
+        {
+            MoveAwayFromTarget();
+            SetRunAnimation(true);
+        }
+        else if (distance > RangedData.PreferredRange)
+        {
+            MoveTowardsTarget();
+            SetRunAnimation(true);
         }
         else
         {
-            if (_wasDetecting)
-            {
-                _wasDetecting = false;
-                _originalPos = transform.position;
-                _patrolTarget = GetRandomPatrolTarget();
-            }
+            StopMovement();
+            SetRunAnimation(false);
+        }
 
-            Patrol();
+        if (distance <= AttackRange && CanStartAttack())
+        {
+            StartAttack();
         }
     }
 
     protected override IEnumerator AttackRoutine()
     {
-        _canAttack = false;
-        yield return StartCoroutine(BurstRoutine());
-        yield return new WaitForSeconds(_attackCooldown);
-        _canAttack = true;
-    }
-
-    protected override void DoAttack() { }
-
-    IEnumerator BurstRoutine()
-    {
-        if (!TryFindPlayer()) yield break;
-        if (_projectilePrefab == null)
-        {
-            Debug.LogWarning($"{gameObject.name}: 투사체가 없습니다.");
+        if (RangedData == null || RangedData.ProjectilePrefab == null || Target == null)
             yield break;
-        }
 
-        _isBursting = true;
-        _rb.linearVelocity = Vector2.zero;
+        StopMovement();
+        yield return new WaitForSeconds(RangedData.AttackWindup);
 
-        Vector2 dir = ((Vector2)_player.position - (Vector2)transform.position).normalized;
-        Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
+        Vector2 origin = _firePoint != null ? (Vector2)_firePoint.position : _rb.position;
+        Vector2 direction = ((Vector2)Target.position - origin).normalized;
+        Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
 
-        for (int i = 0; i < _burstCount; i++)
+        for (int i = 0; i < RangedData.BurstCount; i++)
         {
-            GameObject projectile = _pool != null
-                ? _pool.Get(_projectilePrefab, transform.position, rotation)
-                : Instantiate(_projectilePrefab, transform.position, rotation);
+            EnemyProjectile projectile = Instantiate(RangedData.ProjectilePrefab, origin, rotation);
+            projectile.Initialize(direction, RangedData.ProjectileSpeed, AttackDamage, RangedData.ProjectileLifetime, gameObject);
 
-            projectile.GetComponent<EnemyProjectile>()?.Initialize(_projectileSpeed, _attackDamage);
-
-            if (i < _burstCount - 1)
-                yield return new WaitForSeconds(_burstInterval);
+            if (i < RangedData.BurstCount - 1)
+            {
+                yield return new WaitForSeconds(RangedData.BurstInterval);
+            }
         }
-
-        _isBursting = false;
-    }
-
-    protected override IEnumerator OnDieRoutine()
-    {
-        yield return new WaitForSeconds(0.3f);
     }
 }

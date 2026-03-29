@@ -46,6 +46,7 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
             }
         }
 
+        Debug.Log($"[DungeonGenerator] OnDungeonGenerated Invoke / name = {name}", this);
         OnDungeonGenerated?.Invoke(CurrentLayout);
     }
 

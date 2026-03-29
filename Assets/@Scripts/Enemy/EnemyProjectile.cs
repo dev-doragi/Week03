@@ -1,85 +1,76 @@
-using System.Collections;
 using UnityEngine;
 
 public class EnemyProjectile : MonoBehaviour
 {
-    [SerializeField] private float _lifetime = 5f;
+    [SerializeField] private Rigidbody2D _rb;
+    [SerializeField] private LayerMask _hitMask;
 
+    private Vector2 _direction;
     private float _speed;
+    private float _lifeTime;
     private int _damage;
-
-    private Coroutine _lifeRoutine;
-    private PoolManager _pool;
+    private GameObject _owner;
+    private float _spawnTime;
 
     private void Awake()
     {
-        ManagerRegistry.TryGet(out _pool);
+        if (_rb == null)
+        {
+            _rb = GetComponent<Rigidbody2D>();
+        }
+
+        if (_rb != null)
+        {
+            _rb.gravityScale = 0f;
+            _rb.bodyType = RigidbodyType2D.Kinematic;
+        }
     }
 
-    public void Initialize(float speed, int damage)
+    public void Initialize(Vector2 direction, float speed, int damage, float lifeTime, GameObject owner)
     {
+        _direction = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
         _speed = speed;
         _damage = damage;
+        _lifeTime = lifeTime;
+        _owner = owner;
+        _spawnTime = Time.time;
     }
 
-    private void OnEnable()
+    private void FixedUpdate()
     {
-        if (_lifeRoutine != null)
+        Vector2 delta = _direction * _speed * Time.fixedDeltaTime;
+
+        if (_rb != null)
         {
-            StopCoroutine(_lifeRoutine);
-        }
-
-        _lifeRoutine = StartCoroutine(LifeReturnRoutine(_pool));
-    }
-
-    private void OnDisable()
-    {
-        if (_lifeRoutine != null)
-        {
-            StopCoroutine(_lifeRoutine);
-            _lifeRoutine = null;
-        }
-    }
-
-    private IEnumerator LifeReturnRoutine(PoolManager pool)
-    {
-        yield return new WaitForSeconds(_lifetime);
-
-        if (pool != null)
-        {
-            pool.Return(gameObject);
+            _rb.MovePosition(_rb.position + delta);
         }
         else
+        {
+            transform.position += (Vector3)delta;
+        }
+
+        if (_lifeTime > 0f && Time.time - _spawnTime >= _lifeTime)
         {
             Destroy(gameObject);
         }
     }
 
-    private void Update()
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        transform.Translate(Vector2.right * _speed * Time.deltaTime);
-    }
-
-    private void OnTriggerEnter2D(Collider2D col)
-    {
-        if (col.CompareTag("Player"))
-        {
-            col.GetComponent<IDamageable>()?.TakeDamage(_damage);
-            ReturnToPool();
+        if (other == null)
             return;
-        }
 
-        if (col.CompareTag("Ground"))
+        if (other.gameObject == _owner)
+            return;
+
+        if (_hitMask != 0 && (_hitMask.value & (1 << other.gameObject.layer)) == 0)
+            return;
+
+        if (other.TryGetComponent(out IDamageable damageable))
         {
-            ReturnToPool();
+            damageable.TakeDamage(_damage);
         }
-    }
 
-    private void ReturnToPool()
-    {
-        if (ManagerRegistry.TryGet<PoolManager>(out var pool))
-            pool.Return(gameObject);
-        else
-            Destroy(gameObject);
+        Destroy(gameObject);
     }
 }

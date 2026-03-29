@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName ="SO_",menuName = "PCG/SimpleRAndomWalkData")]
+[CreateAssetMenu(fileName ="SO_SimpleRandomWalk",menuName = "PCG/Simple Random Walk")]
 public class SimpleRandomWalkSO : ScriptableObject
 {
     [SerializeField]
