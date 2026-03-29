@@ -37,7 +37,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     public event Action<int> OnHit;
     public event Action<int> OnHeal;
-    public event Action OnDie;
+    public event Action OnDeathStarted;
 
     private void Awake()
     {
@@ -88,7 +88,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         if (_currentHp <= 0)
         {
-            Die();
+            HandleDeath();
             return;
         }
 
@@ -126,7 +126,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             OnHeal?.Invoke(restored);
     }
 
-    public void Die()
+    public void HandleDeath()
     {
         if (_isDead)
             return;
@@ -134,7 +134,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         _isDead = true;
         StopInvincible();
         StopVisual();
-        OnDie?.Invoke();
+        OnDeathStarted?.Invoke();
     }
 
     private void StartInvincible()

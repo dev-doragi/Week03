@@ -14,6 +14,7 @@ public class PlayerCombat : MonoBehaviour
     private int _currentAmmo;
     private bool _isReloading;
     private Coroutine _reloadRoutine;
+    private PoolManager _poolManager;
 
     public WeaponSO WeaponData => _weaponData;
     public int CurrentAmmo => _currentAmmo;
@@ -26,10 +27,16 @@ public class PlayerCombat : MonoBehaviour
     private void Awake()
     {
         _controller = GetComponent<PlayerController>();
+        ManagerRegistry.TryGet(out _poolManager);
     }
 
     private void Start()
     {
+        if (_poolManager != null && _projectilePrefab != null)
+        {
+            _poolManager.CreatePool(_projectilePrefab.gameObject, 30);
+        }
+
         InitializeAmmo();
     }
 
@@ -62,6 +69,9 @@ public class PlayerCombat : MonoBehaviour
             return;
 
         if (_muzzle == null || _projectilePrefab == null)
+            return;
+
+        if (_poolManager == null)
             return;
 
         if (_controller.IsDashing)
@@ -149,11 +159,9 @@ public class PlayerCombat : MonoBehaviour
             float rad = finalAngle * Mathf.Deg2Rad;
             Vector2 direction = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
 
-            PlayerProjectile projectile = Instantiate(
-                _projectilePrefab,
-                _muzzle.position,
-                Quaternion.Euler(0f, 0f, finalAngle));
+            GameObject projectileObject = _poolManager.Get(_projectilePrefab.gameObject, _muzzle.position, Quaternion.Euler(0f, 0f, finalAngle));
 
+            PlayerProjectile projectile = projectileObject.GetComponent<PlayerProjectile>();
             projectile.Initialize(
                 direction,
                 _weaponData.ProjectileSpeed,

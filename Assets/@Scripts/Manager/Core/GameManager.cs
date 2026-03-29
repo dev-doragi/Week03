@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -16,8 +17,14 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
     [SerializeField] private bool _autoStartInEditor = true;
 
+    [Header("Death Sequence")]
+    [SerializeField] private float _deathSlowTimeScale = 0.5f;
+    [SerializeField] private float _deathSequenceDuration = 0.75f;
+
     private PlayerController _playerController;
     private PlayerHealth _playerHealth;
+    private PlayerCombat _playerCombat;
+    private Coroutine _deathRoutine;
 
     #region Debugging
     [ContextMenu("Debug Die")]
@@ -35,7 +42,11 @@ public class GameManager : PersistentMonoSingleton<GameManager>
     [ContextMenu("Debug Restart")]
     private void DebugRestart()
     {
+#if UNITY_EDITOR
+        DebugRestartGame();
+#else
         RestartGame();
+#endif
     }
     #endregion
 
@@ -91,6 +102,12 @@ public class GameManager : PersistentMonoSingleton<GameManager>
         if (_dungeonGenerator != null)
         {
             _dungeonGenerator.OnDungeonGenerated -= HandleDungeonGenerated;
+        }
+
+        if (_deathRoutine != null)
+        {
+            StopCoroutine(_deathRoutine);
+            _deathRoutine = null;
         }
 
         UnbindPlayer();
@@ -166,21 +183,27 @@ public class GameManager : PersistentMonoSingleton<GameManager>
         if (_playerHealth == null)
             return;
 
-        if (_dungeonSpawnerBuilder != null && _playerController != null)
+        _playerCombat = _playerController.GetComponent<PlayerCombat>();
+        if (_playerCombat == null)
+            return;
+
+        if (_dungeonSpawnerBuilder != null)
         {
             _dungeonSpawnerBuilder.SetSpawnTarget(_playerController.transform);
         }
 
-        _playerHealth.OnDie += HandlePlayerDie;
+        _playerHealth.OnDeathStarted += HandleDeath;
     }
 
     private void UnbindPlayer()
     {
-        if (_playerHealth == null)
-            return;
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnDeathStarted -= HandleDeath;
+        }
 
-        _playerHealth.OnDie -= HandlePlayerDie;
         _playerHealth = null;
+        _playerCombat = null;
         _playerController = null;
     }
 
@@ -197,12 +220,21 @@ public class GameManager : PersistentMonoSingleton<GameManager>
             return;
         }
 
+        if (_deathRoutine != null)
+        {
+            StopCoroutine(_deathRoutine);
+            _deathRoutine = null;
+        }
+
         Debug.Log("Run Setup Begin");
 
         Time.timeScale = 1f;
-        SetPlayerControlEnabled(false);
-        _gameStateManager.ChangeState(GameState.Loading);
+        _poolManager?.ClearRuntimeObjects();
 
+        if (_playerController != null)
+            _playerController.SetControlEnabled(false);
+
+        _gameStateManager.ChangeState(GameState.Loading);
         _dungeonGenerator.GenerateDungeon();
     }
 
@@ -224,7 +256,6 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
         if (_uiManager != null)
         {
-            Debug.Log("Rebinding UI");
             _uiManager.RebindUI();
         }
 
@@ -240,10 +271,17 @@ public class GameManager : PersistentMonoSingleton<GameManager>
             rigidbody2D.angularVelocity = 0f;
         }
 
-        _playerController.ResetRuntimeState();
         _playerHealth.ResetHp();
-        _playerController.gameObject.SetActive(true);
+        _playerController.ResetRuntimeState();
+        _playerCombat.InitializeAmmo();
 
+        PlayerAnimController animController = _playerController.GetComponent<PlayerAnimController>();
+        if (animController != null)
+        {
+            animController.ResetAnimationState();
+        }
+
+        _playerController.gameObject.SetActive(true);
 
         SetPlayerControlEnabled(true);
         _gameStateManager.ChangeState(GameState.Playing);
@@ -260,26 +298,33 @@ public class GameManager : PersistentMonoSingleton<GameManager>
         return new Vector3(spawnTile.x + 0.5f, spawnTile.y + 0.5f, 0f);
     }
 
-    private void HandlePlayerDie()
+    private void HandleDeath()
+    {
+        if (_deathRoutine != null)
+        {
+            StopCoroutine(_deathRoutine);
+        }
+
+        _deathRoutine = StartCoroutine(CoHandleDeath());
+    }
+
+    private IEnumerator CoHandleDeath()
     {
         Debug.Log("Player Die");
 
         SetPlayerControlEnabled(false);
+        _gameStateManager.ChangeState(GameState.Death);
+        Time.timeScale = _deathSlowTimeScale;
 
-        if (_playerController != null)
-        {
-            _playerController.gameObject.SetActive(false);
-            Debug.Log("Player Disabled");
-        }
+        yield return new WaitForSecondsRealtime(_deathSequenceDuration);
 
         _gameStateManager.ChangeState(GameState.GameOver);
-        Debug.Log("GameState -> GameOver");
-
         Time.timeScale = 0f;
-        Debug.Log("Time scaled set 0");
+
+        _deathRoutine = null;
     }
 
-    private void SetPlayerControlEnabled(bool enabled)
+    public void SetPlayerControlEnabled(bool enabled)
     {
         if (_playerController == null)
             return;
@@ -287,7 +332,7 @@ public class GameManager : PersistentMonoSingleton<GameManager>
         _playerController.SetControlEnabled(enabled);
     }
 
-    public void RestartGame()
+    public void DebugRestartGame()
     {
         if (_playerController == null)
         {
@@ -301,6 +346,8 @@ public class GameManager : PersistentMonoSingleton<GameManager>
             return;
         }
 
+        Time.timeScale = 1f;
+
         Rigidbody2D rigidbody2D = _playerController.Rigidbody;
         if (rigidbody2D != null)
         {
@@ -310,10 +357,16 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
         _playerController.ResetRuntimeState();
         _playerHealth.ResetHp();
-
+        _playerCombat.InitializeAmmo();
         _playerController.gameObject.SetActive(true);
 
         SetPlayerControlEnabled(true);
         _gameStateManager.ChangeState(GameState.Playing);
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        BeginRunSetup();
     }
 }

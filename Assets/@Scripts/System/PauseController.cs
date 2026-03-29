@@ -5,6 +5,7 @@ public class PauseController : MonoBehaviour, IInitializable
     public bool IsInitialized { get; private set; }
 
     private GameStateManager _gameStateManager;
+    private GameManager _gameManager;
 
     public void Initialize()
     {
@@ -12,6 +13,7 @@ public class PauseController : MonoBehaviour, IInitializable
             return;
 
         ManagerRegistry.TryGet(out _gameStateManager);
+        ManagerRegistry.TryGet(out _gameManager);
 
         if (_gameStateManager == null)
         {
@@ -22,30 +24,12 @@ public class PauseController : MonoBehaviour, IInitializable
         IsInitialized = true;
     }
 
-    private void HandlePauseInput(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
-    {
-
-        GameState currentState = _gameStateManager.CurrentState;
-
-        if (!ctx.started || currentState == GameState.GameOver)
-            return;
-
-        if (currentState == GameState.Playing)
-        {
-            PauseGame();
-            return;
-        }
-
-        if (currentState == GameState.Paused)
-        {
-            ResumeGame();
-        }
-    }
-
     public void PauseGame()
     {
-        Time.timeScale = 0f;
+        if (_gameManager != null)
+            _gameManager.SetPlayerControlEnabled(false);
 
+        Time.timeScale = 0f;
         _gameStateManager.ChangeState(GameState.Paused);
 
         Debug.Log("Game Paused");
@@ -55,6 +39,9 @@ public class PauseController : MonoBehaviour, IInitializable
     {
         Time.timeScale = 1f;
 
+        if (_gameManager != null)
+            _gameManager.SetPlayerControlEnabled(true);
+
         _gameStateManager.ChangeState(GameState.Playing);
 
         Debug.Log("Game Resumed");
@@ -63,8 +50,6 @@ public class PauseController : MonoBehaviour, IInitializable
     private void OnDestroy()
     {
         if (Time.timeScale == 0f)
-        {
             Time.timeScale = 1f;
-        }
     }
 }

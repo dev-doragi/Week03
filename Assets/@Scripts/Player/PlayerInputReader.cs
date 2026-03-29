@@ -6,16 +6,15 @@ using UnityEngine.InputSystem;
 public class PlayerInputReader : MonoBehaviour
 {
     private const string PLAYER_ACTION_MAP = "Player";
+    private const string SYSTEM_ACTION_MAP = "System";
+    private const string PAUSE_ACTION_MAP = "Pause";
+
     private const string MOVE_ACTION = "Move";
     private const string LOOK_ACTION = "Look";
     private const string ATTACK_ACTION = "Attack";
     private const string DASH_ACTION = "Dash";
     private const string RELOAD_ACTION = "Reload";
     private const string GAMEPAD_SCHEME = "Gamepad";
-
-
-    private const string SYSTEM_ACTION_MAP = "System";
-    private const string PAUSE_ACTION = "Pause";
 
     private PlayerInput _playerInput;
     private InputAction _moveAction;
@@ -41,7 +40,7 @@ public class PlayerInputReader : MonoBehaviour
         _reloadAction = playerActionMap.FindAction(RELOAD_ACTION, true);
 
         InputActionMap systemActionMap = _playerInput.actions.FindActionMap(SYSTEM_ACTION_MAP, true);
-        _pauseAction = systemActionMap.FindAction(PAUSE_ACTION, true);
+        _pauseAction = systemActionMap.FindAction(PAUSE_ACTION_MAP, true);
     }
 
     public Vector2 ReadMove()

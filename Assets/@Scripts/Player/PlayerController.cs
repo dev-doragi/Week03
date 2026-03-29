@@ -30,14 +30,14 @@ public class PlayerController : MonoBehaviour
     public bool IsDashing { get; private set; }
     public bool IsInvincible { get; private set; }
     public bool IsFacingLeft { get; private set; }
-    public bool IsDead { get; private set; }
     public bool IsControlEnabled { get; private set; } = true;
 
     public bool IsMoving => MoveInput.sqrMagnitude > 0.0001f;
     public Rigidbody2D Rigidbody => _rb;
 
     public event Action OnAttackPerformed;
-    public event Action OnDied;
+
+    private PlayerHealth _playerHealth;
 
     private void Awake()
     {
@@ -47,6 +47,7 @@ public class PlayerController : MonoBehaviour
         _movement = GetComponent<PlayerMovement>();
         _aim = GetComponent<PlayerAim>();
         _combat = GetComponent<PlayerCombat>();
+        _playerHealth = GetComponent<PlayerHealth>();
         ManagerRegistry.TryGet(out _pauseController);
     }
 
@@ -58,7 +59,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (IsDead || !IsControlEnabled)
+        if ((_playerHealth != null && _playerHealth.IsDead) || !IsControlEnabled)
         {
             ClearFrameInput();
             return;
@@ -79,7 +80,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (IsDead || !IsControlEnabled)
+        if ((_playerHealth != null && _playerHealth.IsDead) || !IsControlEnabled)
         {
             _rb.linearVelocity = Vector2.zero;
             return;
@@ -91,14 +92,10 @@ public class PlayerController : MonoBehaviour
     public void SetControlEnabled(bool enabled)
     {
         if (_playerInput == null)
-        {
             _playerInput = GetComponent<PlayerInput>();
-        }
 
         if (_rb == null)
-        {
             _rb = GetComponent<Rigidbody2D>();
-        }
 
         IsControlEnabled = enabled;
 
@@ -123,16 +120,21 @@ public class PlayerController : MonoBehaviour
             IsDashPressedThisFrame = false;
             IsReloadPressedThisFrame = false;
 
+            _movement?.StopMovementImmediate();
+
+            IsDashing = false;
+            IsInvincible = false;
+
             if (_rb != null)
             {
                 _rb.linearVelocity = Vector2.zero;
+                _rb.angularVelocity = 0f;
             }
         }
     }
 
     public void ResetRuntimeState()
     {
-        IsDead = false;
         IsDashing = false;
         IsInvincible = false;
         IsAttackPressed = false;
@@ -171,23 +173,6 @@ public class PlayerController : MonoBehaviour
     public void RaiseAttackPerformed()
     {
         OnAttackPerformed?.Invoke();
-    }
-
-    public void Die()
-    {
-        if (IsDead)
-            return;
-
-        IsDead = true;
-        IsDashing = false;
-        IsAttackPressed = false;
-        IsDashPressedThisFrame = false;
-        IsReloadPressedThisFrame = false;
-        MoveInput = Vector2.zero;
-        LookInput = Vector2.zero;
-        _rb.linearVelocity = Vector2.zero;
-
-        OnDied?.Invoke();
     }
 
     private void ClearFrameInput()

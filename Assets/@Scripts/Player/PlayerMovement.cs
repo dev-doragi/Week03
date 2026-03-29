@@ -39,6 +39,9 @@ public class PlayerMovement : MonoBehaviour
         if (!_controller.IsDashPressedThisFrame)
             return;
 
+        if (_controller.MoveInput.sqrMagnitude <= MIN_INPUT_SQR)
+            return;
+
         if (Time.time < _lastDashTime + _movementData.DashCooldown)
             return;
 
@@ -58,6 +61,19 @@ public class PlayerMovement : MonoBehaviour
             return _controller.MoveInput.normalized;
 
         return _controller.AimDirection;
+    }
+
+    public void StopMovementImmediate()
+    {
+        if (_dashRoutine != null)
+        {
+            StopCoroutine(_dashRoutine);
+            _dashRoutine = null;
+        }
+
+        _controller.SetDashing(false);
+        _controller.SetInvincible(false);
+        _controller.Rigidbody.linearVelocity = Vector2.zero;
     }
 
     private IEnumerator DashRoutine(Vector2 dashDirection)

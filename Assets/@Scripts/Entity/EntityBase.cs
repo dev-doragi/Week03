@@ -51,7 +51,7 @@ public abstract class EntityBase : MonoBehaviour, IDamageable
 
         if (CurrentHp == 0)
         {
-            Die();
+            HandleDeath();
         }
     }
 
@@ -69,7 +69,7 @@ public abstract class EntityBase : MonoBehaviour, IDamageable
         return true;
     }
 
-    public virtual void Die()
+    public virtual void HandleDeath()
     {
         EnterDeathState();
     }

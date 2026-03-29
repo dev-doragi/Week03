@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class MeleeEnemy : EnemyBase
 {
     [SerializeField] private Transform _attackPivot;
@@ -10,13 +14,13 @@ public class MeleeEnemy : EnemyBase
     protected SO_MeleeEnemyData MeleeData => EnemyData as SO_MeleeEnemyData;
 
     // Debug
-    protected override void Awake()
-    {
-        base.Awake();
+    //protected override void Awake()
+    //{
+    //    base.Awake();
 
-        var player = FindAnyObjectByType<PlayerController>();
-        SetTarget(player.gameObject.transform);
-    }
+    //    var player = FindAnyObjectByType<PlayerController>();
+    //    SetTarget(player.gameObject.transform);
+    //}
 
     protected override void TickCombat(float distance)
     {
@@ -120,4 +124,42 @@ public class MeleeEnemy : EnemyBase
             Destroy(effectObject, MeleeData.SlashEffectLifetime);
         }
     }
+
+#if UNITY_EDITOR
+    [Header("Gizmos (Editor)")]
+    [SerializeField] private bool _showGizmos = true;
+    [SerializeField] private bool _showDetectionGizmo = true;
+    [SerializeField] private bool _showAttackRangeGizmo = true;
+    [SerializeField] private bool _showAttackRadiusGizmo = true;
+    [SerializeField] private Color _detectionGizmoColor = new Color(0f, 1f, 0f, 0.25f);
+    [SerializeField] private Color _attackRangeGizmoColor = new Color(1f, 0.5f, 0f, 0.25f);
+    [SerializeField] private Color _attackRadiusGizmoColor = new Color(1f, 0f, 0f, 0.25f);
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!_showGizmos)
+            return;
+
+        Vector3 center = transform.position;
+
+        if (_showDetectionGizmo && EnemyData != null)
+        {
+            Gizmos.color = _detectionGizmoColor;
+            Gizmos.DrawWireSphere(center, EnemyData.DetectionRange);
+        }
+
+        if (_showAttackRangeGizmo && EnemyData != null)
+        {
+            Gizmos.color = _attackRangeGizmoColor;
+            Gizmos.DrawWireSphere(center, EnemyData.AttackRange);
+        }
+
+        if (_showAttackRadiusGizmo && MeleeData != null)
+        {
+            Vector3 origin = _attackPoint != null ? _attackPoint.position : transform.position;
+            Gizmos.color = _attackRadiusGizmoColor;
+            Gizmos.DrawWireSphere(origin, MeleeData.AttackRadius);
+        }
+    }
+#endif
 }

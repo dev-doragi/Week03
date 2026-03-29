@@ -10,6 +10,7 @@ public enum GameState
     Playing,
     Paused,
     Respawning,
+    Death,
     GameOver,
     Clear
 }

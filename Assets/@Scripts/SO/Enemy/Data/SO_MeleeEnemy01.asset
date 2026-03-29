@@ -15,10 +15,10 @@ MonoBehaviour:
   _maxHp: 4
   _attackDamage: 1
   _moveSpeed: 2
-  _detectionRange: 8
+  _detectionRange: 16
   _attackRange: 1.5
   _attackCooldown: 1.2
-  _deathDespawnDelay: 0.35
+  _deathDespawnDelay: 0.7
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
@@ -32,7 +32,7 @@ MonoBehaviour:
   _hitSpriteDuration: 0.08
   _flipThreshold: 0.01
   _attackRadius: 0.75
-  _attackWindup: 0.12
+  _attackWindup: 0.5
   _targetMask:
     serializedVersion: 2
     m_Bits: 8

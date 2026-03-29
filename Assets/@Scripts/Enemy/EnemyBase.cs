@@ -6,6 +6,7 @@ using UnityEngine;
 public abstract class EnemyBase : EntityBase
 {
     [SerializeField] private SO_EnemyBaseData _enemyData;
+    [SerializeField] private Collider2D _bodyCollider;
 
     protected Transform _target;
     protected bool _isAttacking;
@@ -17,6 +18,7 @@ public abstract class EnemyBase : EntityBase
     private Coroutine _deathRoutine;
     private bool _shouldPlayRunAnimation;
     private Vector2 _facingDirection = Vector2.right;
+    private GameStateManager _gameStateManager;
 
     public event Action<EnemyBase> OnDeathFinished;
 
@@ -27,6 +29,13 @@ public abstract class EnemyBase : EntityBase
     public int AttackDamage => _enemyData != null ? _enemyData.AttackDamage : 0;
     public float AttackRange => _enemyData != null ? _enemyData.AttackRange : 0f;
     public float MoveSpeed => _enemyData != null ? _enemyData.MoveSpeed : 0f;
+
+    protected virtual void Start()
+    {
+        ManagerRegistry.TryGet(out _gameStateManager);
+
+        _bodyCollider = GetComponent<BoxCollider2D>();
+    }
 
     protected override int GetMaxHp()
     {
@@ -49,6 +58,9 @@ public abstract class EnemyBase : EntityBase
         _shouldPlayRunAnimation = false;
         _facingDirection = Vector2.right;
 
+        if (_bodyCollider != null)
+            _bodyCollider.enabled = true;
+
         if (_attackRoutine != null)
         {
             StopCoroutine(_attackRoutine);
@@ -66,6 +78,13 @@ public abstract class EnemyBase : EntityBase
     {
         if (IsDead)
             return;
+
+        if (_gameStateManager != null && _gameStateManager.CurrentState != GameState.Playing)
+        {
+            SetRunAnimation(false);
+            StopMovement();
+            return;
+        }
 
         if (_enemyData == null)
         {
@@ -210,7 +229,7 @@ public abstract class EnemyBase : EntityBase
     protected abstract void TickCombat(float distance);
     protected abstract IEnumerator AttackRoutine();
 
-    public override void Die()
+    public override void HandleDeath()
     {
         if (EnterDeathState() == false)
             return;
@@ -223,6 +242,10 @@ public abstract class EnemyBase : EntityBase
 
         SetRunAnimation(false);
         StopMovement();
+
+        if (_bodyCollider != null)
+            _bodyCollider.enabled = false;
+
         _deathRoutine = StartCoroutine(CoDeath());
     }
 
