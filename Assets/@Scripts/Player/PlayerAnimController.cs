@@ -18,6 +18,9 @@ public class PlayerAnimController : MonoBehaviour
     private PlayerController _controller;
     private PlayerHealth _playerHealth;
 
+    // WeaponPivot 캐싱용 변수
+    private GameObject _weaponPivot;
+
     private void Awake()
     {
         _controller = GetComponent<PlayerController>();
@@ -25,6 +28,17 @@ public class PlayerAnimController : MonoBehaviour
 
         if (_animator == null)
             _animator = GetComponentInChildren<Animator>();
+
+        // 비활성화된 자식까지 포함하여 모든 트랜스폼을 검사해 WeaponPivot을 찾습니다.
+        Transform[] allChildren = GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < allChildren.Length; i++)
+        {
+            if (allChildren[i].name == "WeaponPivot")
+            {
+                _weaponPivot = allChildren[i].gameObject;
+                break;
+            }
+        }
     }
 
     private void OnEnable()
@@ -67,6 +81,10 @@ public class PlayerAnimController : MonoBehaviour
 
     private void HandleDeathStarted()
     {
+        // 사망 시 WeaponPivot 비활성화
+        if (_weaponPivot != null)
+            _weaponPivot.SetActive(false);
+
         if (_animator == null)
             return;
 
@@ -79,6 +97,10 @@ public class PlayerAnimController : MonoBehaviour
 
     public void ResetAnimationState()
     {
+        // 재시작(초기화) 시 WeaponPivot 활성화
+        if (_weaponPivot != null)
+            _weaponPivot.SetActive(true);
+
         if (_animator == null)
             return;
 

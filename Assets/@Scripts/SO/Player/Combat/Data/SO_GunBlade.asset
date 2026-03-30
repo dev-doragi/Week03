@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4677ceca549c6d429a043aae74afab8, type: 3}
-  m_Name: SO_SMG
+  m_Name: SO_GunBlade
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSO
-  <AttackInterval>k__BackingField: 0.15
+  <AttackInterval>k__BackingField: 0.17
   <Damage>k__BackingField: 1
   <ProjectileSpeed>k__BackingField: 15
-  <ProjectileLifetime>k__BackingField: 0.75
-  <MaxAmmo>k__BackingField: 35
-  <ReloadDuration>k__BackingField: 2
-  <ProjectilePrefab>k__BackingField: {fileID: 5659828644058746940, guid: ab833ea123f49a741b8a6fdc1440e197, type: 3}
+  <ProjectileLifetime>k__BackingField: 2
+  <MaxAmmo>k__BackingField: 6
+  <ReloadDuration>k__BackingField: 1.75
+  <ProjectilePrefab>k__BackingField: {fileID: 5659828644058746940, guid: 30b8c9cd0c85fc1469becaab04a5223e, type: 3}
   <SpreadAngle>k__BackingField: 0
   <PelletCount>k__BackingField: 1
-  <WeaponPrefab>k__BackingField: {fileID: 7553991377772159881, guid: 1576fc60264836248b2427b998054cac, type: 3}
+  <WeaponPrefab>k__BackingField: {fileID: 7553991377772159881, guid: 78e288e048061154ebddbbc901c4874a, type: 3}

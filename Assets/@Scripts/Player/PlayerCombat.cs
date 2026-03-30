@@ -5,11 +5,15 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCombat : MonoBehaviour
 {
-    [SerializeField] private WeaponSO _weaponData;
-    [SerializeField] private Transform _muzzle;
-    [SerializeField] private PlayerProjectile _projectilePrefab;
-
+    [SerializeField] private Transform _weaponHoldPoint; // 무기 프리팹이 생성될 부모 트랜스폼
     [SerializeField] private CameraShakeModule _cameraShake;
+
+    [Header("Starting Weapon")]
+    [SerializeField] private WeaponSO _startingWeapon; // 인스펙터에서 할당할 기본 무기 SO
+
+    private WeaponSO _weaponData;
+    private Transform _muzzle; // 생성된 프리팹에서 추출할 총구 위치
+    private GameObject _currentWeaponInstance;
 
     private PlayerController _controller;
     private float _lastAttackTime = -100f;
@@ -34,12 +38,11 @@ public class PlayerCombat : MonoBehaviour
 
     private void Start()
     {
-        if (_poolManager != null && _projectilePrefab != null)
+        // 게임 시작 시 인스펙터에 할당된 SO가 있다면 장착 처리
+        if (_startingWeapon != null)
         {
-            _poolManager.CreatePool(_projectilePrefab.gameObject, 30);
+            EquipWeapon(_startingWeapon);
         }
-
-        InitializeAmmo();
     }
 
     private void OnDisable()
@@ -51,6 +54,45 @@ public class PlayerCombat : MonoBehaviour
         }
 
         _isReloading = false;
+    }
+
+    // 무기 장착 및 교체 로직
+    public void EquipWeapon(WeaponSO newWeapon)
+    {
+        if (newWeapon == null) return;
+
+        _weaponData = newWeapon;
+
+        // 기존 장착된 무기 객체 제거
+        if (_currentWeaponInstance != null)
+        {
+            Destroy(_currentWeaponInstance);
+        }
+
+        // 새 무기 프리팹 생성 및 초기화
+        if (_weaponData.WeaponPrefab != null && _weaponHoldPoint != null)
+        {
+            _currentWeaponInstance = Instantiate(_weaponData.WeaponPrefab, _weaponHoldPoint, false);
+
+            WeaponVisual visual = _currentWeaponInstance.GetComponent<WeaponVisual>();
+            if (visual != null)
+            {
+                _muzzle = visual.MuzzleTransform;
+            }
+            else
+            {
+                Debug.LogWarning("Weapon 프리팹에 WeaponVisual 스크립트가 없습니다.");
+                _muzzle = _currentWeaponInstance.transform; // Fallback
+            }
+        }
+
+        // 새 무기의 투사체 풀링 초기화
+        if (_poolManager != null && _weaponData.ProjectilePrefab != null)
+        {
+            _poolManager.CreatePool(_weaponData.ProjectilePrefab, 30);
+        }
+
+        InitializeAmmo();
     }
 
     public void InitializeAmmo()
@@ -70,7 +112,7 @@ public class PlayerCombat : MonoBehaviour
         if (_weaponData == null)
             return;
 
-        if (_muzzle == null || _projectilePrefab == null)
+        if (_muzzle == null || _weaponData.ProjectilePrefab == null)
             return;
 
         if (_poolManager == null)
@@ -94,7 +136,8 @@ public class PlayerCombat : MonoBehaviour
             return;
         }
 
-        _cameraShake.Play(0.15f);
+        if (_cameraShake != null)
+            _cameraShake.Play(0.15f);
 
         Fire();
 
@@ -163,14 +206,18 @@ public class PlayerCombat : MonoBehaviour
             float rad = finalAngle * Mathf.Deg2Rad;
             Vector2 direction = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
 
-            GameObject projectileObject = _poolManager.Get(_projectilePrefab.gameObject, _muzzle.position, Quaternion.Euler(0f, 0f, finalAngle));
+            // 투사체를 WeaponSO에 정의된 프리팹으로 생성
+            GameObject projectileObject = _poolManager.Get(_weaponData.ProjectilePrefab, _muzzle.position, Quaternion.Euler(0f, 0f, finalAngle));
 
             PlayerProjectile projectile = projectileObject.GetComponent<PlayerProjectile>();
-            projectile.Initialize(
-                direction,
-                _weaponData.ProjectileSpeed,
-                _weaponData.ProjectileLifetime,
-                _weaponData.Damage);
+            if (projectile != null)
+            {
+                projectile.Initialize(
+                    direction,
+                    _weaponData.ProjectileSpeed,
+                    _weaponData.ProjectileLifetime,
+                    _weaponData.Damage);
+            }
         }
     }
 }

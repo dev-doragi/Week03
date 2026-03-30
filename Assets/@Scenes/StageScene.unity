@@ -25746,6 +25746,11 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!4 &723573407 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4159770283577924430, guid: 838eacc9bc9cce841addaa4be065c950, type: 3}
+  m_PrefabInstance: {fileID: 3781954488073005085}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &723598016
 GameObject:
   m_ObjectHideFlags: 0
@@ -44299,6 +44304,14 @@ PrefabInstance:
       propertyPath: _cameraShake
       value: 
       objectReference: {fileID: 293099526}
+    - target: {fileID: 7321430739333096605, guid: 838eacc9bc9cce841addaa4be065c950, type: 3}
+      propertyPath: _startingWeapon
+      value: 
+      objectReference: {fileID: 11400000, guid: 23e3f26d4d48e4b41b931739a0cfac45, type: 2}
+    - target: {fileID: 9057974141706952158, guid: 838eacc9bc9cce841addaa4be065c950, type: 3}
+      propertyPath: _gunVisualRoot
+      value: 
+      objectReference: {fileID: 723573407}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

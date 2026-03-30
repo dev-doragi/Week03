@@ -21,3 +21,4 @@ MonoBehaviour:
   <ProjectilePrefab>k__BackingField: {fileID: 5659828644058746940, guid: 30b8c9cd0c85fc1469becaab04a5223e, type: 3}
   <SpreadAngle>k__BackingField: 0
   <PelletCount>k__BackingField: 1
+  <WeaponPrefab>k__BackingField: {fileID: 7553991377772159881, guid: 486feedde65cc65488268a723ad65ee4, type: 3}
