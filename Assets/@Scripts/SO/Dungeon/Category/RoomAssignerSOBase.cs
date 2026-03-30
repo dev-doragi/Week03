@@ -10,7 +10,8 @@ public abstract class RoomAssignerSOBase : ScriptableObject
         Random,
         RandomSmall,
         FarthestFromStart,
-        FarthestThenLargest
+        FarthestThenLargest,
+        ClosestToCenter
     }
 
     public abstract void AssignRoomTypes(List<DungeonRoom> rooms);

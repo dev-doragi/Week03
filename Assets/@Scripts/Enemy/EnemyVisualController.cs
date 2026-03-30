@@ -130,9 +130,14 @@ public class EnemyVisualController : MonoBehaviour
         if (_animator != null)
             _animator.enabled = false;
 
-        if (_enemy != null && _enemy.EnemyData != null && _enemy.EnemyData.DeathSprite != null)
+        if (_spriteRenderer != null)
         {
-            _spriteRenderer.sprite = _enemy.EnemyData.DeathSprite;
+            if (_enemy != null && _enemy.EnemyData != null && _enemy.EnemyData.DeathSprite != null)
+            {
+                _spriteRenderer.sprite = _enemy.EnemyData.DeathSprite;
+            }
+
+            _spriteRenderer.sortingOrder = 0;
         }
     }
 

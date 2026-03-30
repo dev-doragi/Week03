@@ -18,6 +18,8 @@ public class DungeonRoom
     public Vector2Int Center { get; }
     public HashSet<Vector2Int> FloorTiles { get; }
 
+    public int ConnectionCount { get; set; } = 0;
+
     public HashSet<Vector2Int> NearWallTilesUp { get; } = new();
     public HashSet<Vector2Int> NearWallTilesDown { get; } = new();
     public HashSet<Vector2Int> NearWallTilesLeft { get; } = new();

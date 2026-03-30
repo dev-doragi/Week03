@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8784108644953040027}
   - component: {fileID: 3974737718686633675}
   m_Layer: 7
-  m_Name: MeleeEnemy01
+  m_Name: MeleeEnemy03
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -76,8 +76,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8443d191e1ae6d42914760eb190a7e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeEnemy
-  _enemyData: {fileID: 11400000, guid: 27324049c46526d4b85043aa22fb347b, type: 2}
-  _bodyCollider: {fileID: 0}
+  _enemyData: {fileID: 11400000, guid: e905f0890195c54409cc3127fa8eed76, type: 2}
+  _bodyCollider: {fileID: 3974737718686633675}
   _attackPivot: {fileID: 7179871702954794833}
   _attackPoint: {fileID: 8719489503310558244}
   _showGizmos: 1
@@ -292,7 +292,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7806976050856398930, guid: 0026b8ecd529df640bf23d625fb6f515, type: 3}
+  m_Sprite: {fileID: -1706916449, guid: 84623e29596903f41b967eb18e7353fa, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -312,7 +312,7 @@ Animator:
   m_GameObject: {fileID: 8555266444397792630}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 3c7e6d11906c235439f5ed9fdc2f8f16, type: 2}
+  m_Controller: {fileID: 22100000, guid: dbde5dee2b9820c44b8d506ba6e04c72, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

@@ -94,6 +94,11 @@ public class EnemySpawner : MonoBehaviour
         return maxCount;
     }
 
+    public void SetBlocks(GameObject[] blocks)
+    {
+        _blocks = blocks;
+    }
+
     public void StartFirstWave()
     {
         if (_hasStarted)
@@ -103,6 +108,15 @@ public class EnemySpawner : MonoBehaviour
 
         if (_isShuttingDown || !this)
             return;
+
+        if (_blocks != null)
+        {
+            for (int i = 0; i < _blocks.Length; i++)
+            {
+                if (_blocks[i] != null)
+                    _blocks[i].SetActive(true);
+            }
+        }
 
         if (_waveDatas == null || _waveDatas.Count == 0)
         {

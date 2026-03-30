@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-    [CreateAssetMenu(fileName = "SO_BasicRoomAssignRule", menuName = "Scriptable Objects/Dungeon/Room Assigner/Basic Room Assign Rule")]
+[CreateAssetMenu(fileName = "SO_BasicRoomAssignRule", menuName = "Scriptable Objects/Dungeon/Room Assigner/Basic Room Assign Rule")]
 public class BasicRoomAssignerSO : RoomAssignerSOBase
 {
     [SerializeField] private RoomType _targetRoomType = RoomType.Normal;
@@ -10,6 +10,10 @@ public class BasicRoomAssignerSO : RoomAssignerSOBase
     [SerializeField] private Vector2Int _maxRoomSize = new Vector2Int(999, 999);
     [SerializeField] private bool _excludeStartRoom = true;
     [SerializeField] private bool _onlyNormalRoom = true;
+    [SerializeField] private bool _requireDeadEnd = true;
+
+    public Vector2Int MinRoomSize => _minRoomSize;
+    public Vector2Int MaxRoomSize => _maxRoomSize;
 
     public override void AssignRoomTypes(List<DungeonRoom> rooms)
     {
@@ -17,10 +21,40 @@ public class BasicRoomAssignerSO : RoomAssignerSOBase
             return;
 
         DungeonRoom targetRoom = FindTargetRoom(rooms);
-        if (targetRoom == null)
-            return;
 
-        targetRoom.RoomType = _targetRoomType;
+        if (targetRoom == null && _requireDeadEnd)
+        {
+            Debug.LogWarning($"[{name}] 막다른 길 조건을 만족하는 방이 없어 조건을 해제합니다.");
+            bool originalDeadEnd = _requireDeadEnd;
+            _requireDeadEnd = false;
+
+            targetRoom = FindTargetRoom(rooms);
+
+            _requireDeadEnd = originalDeadEnd;
+        }
+
+        if (targetRoom == null)
+        {
+            Debug.LogWarning($"[{name}] 크기 조건을 만족하는 방이 없어 강제 할당합니다.");
+            Vector2Int originalMin = _minRoomSize;
+            Vector2Int originalMax = _maxRoomSize;
+            bool originalDeadEnd = _requireDeadEnd;
+
+            _minRoomSize = new Vector2Int(1, 1);
+            _maxRoomSize = new Vector2Int(999, 999);
+            _requireDeadEnd = false;
+
+            targetRoom = FindTargetRoom(rooms);
+
+            _minRoomSize = originalMin;
+            _maxRoomSize = originalMax;
+            _requireDeadEnd = originalDeadEnd;
+        }
+
+        if (targetRoom != null)
+        {
+            targetRoom.RoomType = _targetRoomType;
+        }
     }
 
     private DungeonRoom FindTargetRoom(List<DungeonRoom> rooms)
@@ -30,6 +64,9 @@ public class BasicRoomAssignerSO : RoomAssignerSOBase
         for (int i = 0; i < rooms.Count; i++)
         {
             DungeonRoom room = rooms[i];
+
+            if (_requireDeadEnd && room.ConnectionCount != 1)
+                continue;
 
             if (_onlyNormalRoom && room.RoomType != RoomType.Normal)
                 continue;
@@ -71,6 +108,9 @@ public class BasicRoomAssignerSO : RoomAssignerSOBase
 
             case RoomSelectPolicy.FarthestThenLargest:
                 return FindFarthestThenLargestRoom(candidates, rooms);
+
+            case RoomSelectPolicy.ClosestToCenter:
+                return FindClosestToCenterRoom(candidates, rooms);
         }
 
         return null;
@@ -191,6 +231,39 @@ public class BasicRoomAssignerSO : RoomAssignerSOBase
             {
                 bestArea = area;
                 bestRoom = room;
+            }
+        }
+
+        return bestRoom;
+    }
+
+    private DungeonRoom FindClosestToCenterRoom(List<DungeonRoom> candidates, List<DungeonRoom> allRooms)
+    {
+        Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
+        Vector2 max = new Vector2(float.MinValue, float.MinValue);
+
+        for (int i = 0; i < allRooms.Count; i++)
+        {
+            BoundsInt b = allRooms[i].Bounds;
+            if (b.xMin < min.x) min.x = b.xMin;
+            if (b.yMin < min.y) min.y = b.yMin;
+            if (b.xMax > max.x) max.x = b.xMax;
+            if (b.yMax > max.y) max.y = b.yMax;
+        }
+
+        Vector2 dungeonCenter = (min + max) / 2f;
+
+        DungeonRoom bestRoom = null;
+        float bestDistance = float.MaxValue;
+
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            float distance = Vector2.Distance(candidates[i].Center, dungeonCenter);
+
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestRoom = candidates[i];
             }
         }
 

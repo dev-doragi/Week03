@@ -12,32 +12,24 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
     [SerializeField][Range(0, 10)] private int _offset = 1;
     [SerializeField] private bool _randomWalkRooms = false;
 
-    [SerializeField] private Vector2Int _startRoomMinSize = new Vector2Int(8, 8);
     public DungeonRoom StartRoom { get; private set; }
     public Vector2Int PlayerSpawnTile { get; private set; }
 
     [SerializeField] private List<DungeonPropPlacer> _propPlacers = new();
-
     [SerializeField] private RoomAssignerSOBase[] _roomAssigners;
 
     public DungeonLayout CurrentLayout { get; private set; }
-
     public event Action<DungeonLayout> OnDungeonGenerated;
 
     protected override void RunProceduralGeneration()
     {
-        // RoomFirst 기반 레이아웃을 생성합니다.
         CurrentLayout = CreateDungeonLayout();
         if (CurrentLayout == null)
             return;
 
-        // 생성된 바닥 타일을 렌더링합니다.
         _tilemapVisualizer.PaintFloorTiles(CurrentLayout.FloorTiles);
-
-        // 바닥 기준으로 벽을 생성합니다.
         WallGenerator.CreateWalls(CurrentLayout.FloorTiles, _tilemapVisualizer);
 
-        // 배치기가 연결되어 있으면 프리팹 배치를 수행합니다.
         for (int i = 0; i < _propPlacers.Count; i++)
         {
             if (_propPlacers[i] != null)
@@ -56,7 +48,6 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
             (Vector3Int)_startPosition,
             new Vector3Int(_dungeonWidth, _dungeonHeight, 0));
 
-        // BSP로 방 후보 영역을 분할합니다.
         List<BoundsInt> roomBoundsList =
             ProceduralGenerationAlgorithms.BinarySpacePartitioning(
                 dungeonBounds,
@@ -67,14 +58,13 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
             ? CreateRandomWalkRooms(roomBoundsList)
             : CreateSimpleRooms(roomBoundsList);
 
-        StartRoom = DungeonStartRoomSelector.FindCenterRoom(rooms, dungeonBounds, _startRoomMinSize);
+        if (rooms.Count == 0)
+            return null;
 
-        if (StartRoom != null)
-        {
-            StartRoom.RoomType = RoomType.Start;
-            PlayerSpawnTile = StartRoom.Center;
-        }
+        // 시작점 할당 전에 방들을 연결하여 ConnectionCount 계산
+        HashSet<Vector2Int> corridorTiles = ConnectRoomsByObject(rooms, rooms[0]);
 
+        // SO 정책에 따라 방 할당
         if (_roomAssigners != null)
         {
             for (int i = 0; i < _roomAssigners.Length; i++)
@@ -86,16 +76,28 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
             }
         }
 
-        List<Vector2Int> roomCenters = new List<Vector2Int>();
+        // 할당된 방 중 StartRoom 탐색
+        StartRoom = null;
         for (int i = 0; i < rooms.Count; i++)
         {
-            roomCenters.Add(rooms[i].Center);
+            if (rooms[i].RoomType == RoomType.Start)
+            {
+                StartRoom = rooms[i];
+                PlayerSpawnTile = StartRoom.Center;
+                break;
+            }
         }
 
-        // 방 중심끼리 복도를 연결합니다.
-        HashSet<Vector2Int> corridorTiles = ConnectRooms(roomCenters, StartRoom != null ? StartRoom.Center : roomCenters[0]);
+        // 안전장치: SO에서 StartRoom이 지정되지 않은 경우 임의 할당
+        if (StartRoom == null)
+        {
+            StartRoom = rooms[0];
+            StartRoom.RoomType = RoomType.Start;
+            PlayerSpawnTile = StartRoom.Center;
+        }
 
         HashSet<Vector2Int> floorTiles = new HashSet<Vector2Int>(corridorTiles);
+
         for (int i = 0; i < rooms.Count; i++)
         {
             floorTiles.UnionWith(rooms[i].FloorTiles);
@@ -107,7 +109,6 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
             corridorTiles,
             rooms);
 
-        // 방 내부 분석 데이터를 생성합니다.
         DungeonLayoutAnalyzer.Analyze(layout);
 
         return layout;
@@ -117,15 +118,60 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
     {
         List<DungeonRoom> rooms = new List<DungeonRoom>();
 
+        List<BasicRoomAssignerSO> requiredSOs = new List<BasicRoomAssignerSO>();
+        if (_roomAssigners != null)
+        {
+            for (int i = 0; i < _roomAssigners.Length; i++)
+            {
+                if (_roomAssigners[i] is BasicRoomAssignerSO basicSO)
+                {
+                    if (basicSO.MinRoomSize.x > 1 || basicSO.MaxRoomSize.x < 999)
+                    {
+                        requiredSOs.Add(basicSO);
+                    }
+                }
+            }
+            requiredSOs.Sort((a, b) => (b.MinRoomSize.x * b.MinRoomSize.y).CompareTo(a.MinRoomSize.x * a.MinRoomSize.y));
+        }
+
         for (int i = 0; i < roomBoundsList.Count; i++)
         {
-            BoundsInt roomBounds = roomBoundsList[i];
-            HashSet<Vector2Int> roomFloor = CreateSimpleRoomFloor(roomBounds);
-            Vector2Int roomCenter = new Vector2Int(
-                Mathf.RoundToInt(roomBounds.center.x),
-                Mathf.RoundToInt(roomBounds.center.y));
+            BoundsInt nodeBounds = roomBoundsList[i];
 
-            rooms.Add(new DungeonRoom(roomBounds, roomCenter, roomFloor));
+            int roomWidth = nodeBounds.size.x;
+            int roomHeight = nodeBounds.size.y;
+            int xOffset = 0;
+            int yOffset = 0;
+
+            for (int j = 0; j < requiredSOs.Count; j++)
+            {
+                Vector2Int minReq = requiredSOs[j].MinRoomSize;
+                Vector2Int maxReq = requiredSOs[j].MaxRoomSize;
+
+                if (nodeBounds.size.x >= minReq.x && nodeBounds.size.y >= minReq.y)
+                {
+                    roomWidth = Mathf.Clamp(nodeBounds.size.x, minReq.x, maxReq.x);
+                    roomHeight = Mathf.Clamp(nodeBounds.size.y, minReq.y, maxReq.y);
+
+                    xOffset = (nodeBounds.size.x - roomWidth) / 2;
+                    yOffset = (nodeBounds.size.y - roomHeight) / 2;
+
+                    requiredSOs.RemoveAt(j);
+                    break;
+                }
+            }
+
+            BoundsInt actualRoomBounds = new BoundsInt(
+                new Vector3Int(nodeBounds.min.x + xOffset, nodeBounds.min.y + yOffset, 0),
+                new Vector3Int(roomWidth, roomHeight, 0)
+            );
+
+            HashSet<Vector2Int> roomFloor = CreateSimpleRoomFloor(actualRoomBounds);
+            Vector2Int roomCenter = new Vector2Int(
+                Mathf.RoundToInt(actualRoomBounds.center.x),
+                Mathf.RoundToInt(actualRoomBounds.center.y));
+
+            rooms.Add(new DungeonRoom(actualRoomBounds, roomCenter, roomFloor));
         }
 
         return rooms;
@@ -142,11 +188,9 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
                 Mathf.RoundToInt(roomBounds.center.x),
                 Mathf.RoundToInt(roomBounds.center.y));
 
-            // 기존 Random Walk 결과를 방 영역 내부로 잘라냅니다.
             HashSet<Vector2Int> randomWalkFloor = RunRandomWalk(_randomWalkParameters, roomCenter);
             HashSet<Vector2Int> clippedFloor = ClipFloorToBounds(randomWalkFloor, roomBounds);
 
-            // Random Walk 결과가 비면 단순 직사각형 방으로 대체합니다.
             if (clippedFloor.Count == 0)
             {
                 clippedFloor = CreateSimpleRoomFloor(roomBounds);
@@ -199,29 +243,49 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
         return clippedFloor;
     }
 
-    private HashSet<Vector2Int> ConnectRooms(List<Vector2Int> roomCenters, Vector2Int startCenter)
+    private HashSet<Vector2Int> ConnectRoomsByObject(List<DungeonRoom> rooms, DungeonRoom startRoom)
     {
         HashSet<Vector2Int> corridorTiles = new HashSet<Vector2Int>();
-        if (roomCenters.Count == 0)
-            return corridorTiles;
+        if (rooms.Count == 0) return corridorTiles;
 
-        List<Vector2Int> remainingCenters = new List<Vector2Int>(roomCenters);
-        Vector2Int currentRoomCenter = startCenter;
-        remainingCenters.Remove(currentRoomCenter);
+        List<DungeonRoom> remainingRooms = new List<DungeonRoom>(rooms);
+        DungeonRoom currentRoom = startRoom ?? rooms[0];
+        remainingRooms.Remove(currentRoom);
 
-        while (remainingCenters.Count > 0)
+        while (remainingRooms.Count > 0)
         {
-            Vector2Int closestCenter = FindClosestPointTo(currentRoomCenter, remainingCenters);
-            remainingCenters.Remove(closestCenter);
+            DungeonRoom closestRoom = FindClosestRoomTo(currentRoom, remainingRooms);
+            remainingRooms.Remove(closestRoom);
 
-            // 가장 가까운 방과 현재 방을 연결합니다.
-            HashSet<Vector2Int> corridor = CreateCorridor(currentRoomCenter, closestCenter);
+            currentRoom.ConnectionCount++;
+            closestRoom.ConnectionCount++;
+
+            HashSet<Vector2Int> corridor = CreateCorridor(currentRoom.Center, closestRoom.Center);
             corridorTiles.UnionWith(corridor);
 
-            currentRoomCenter = closestCenter;
+            currentRoom = closestRoom;
         }
 
         return corridorTiles;
+    }
+
+    private DungeonRoom FindClosestRoomTo(DungeonRoom currentRoom, List<DungeonRoom> rooms)
+    {
+        DungeonRoom closestRoom = null;
+        float shortestDistance = float.MaxValue;
+
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            float currentDistance = Vector2.Distance(rooms[i].Center, currentRoom.Center);
+
+            if (currentDistance < shortestDistance)
+            {
+                shortestDistance = currentDistance;
+                closestRoom = rooms[i];
+            }
+        }
+
+        return closestRoom;
     }
 
     private HashSet<Vector2Int> CreateCorridor(Vector2Int currentRoomCenter, Vector2Int destination)
@@ -249,26 +313,5 @@ public class DungeonGenerator : SimpleRandomWalkDungeonGenerator
         }
 
         return corridor;
-    }
-
-    private Vector2Int FindClosestPointTo(
-        Vector2Int currentRoomCenter,
-        List<Vector2Int> roomCenters)
-    {
-        Vector2Int closestPoint = Vector2Int.zero;
-        float shortestDistance = float.MaxValue;
-
-        for (int i = 0; i < roomCenters.Count; i++)
-        {
-            float currentDistance = Vector2.Distance(roomCenters[i], currentRoomCenter);
-
-            if (currentDistance < shortestDistance)
-            {
-                shortestDistance = currentDistance;
-                closestPoint = roomCenters[i];
-            }
-        }
-
-        return closestPoint;
     }
 }

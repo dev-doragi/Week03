@@ -16,6 +16,8 @@ public class DungeonSpawnerBuilder : MonoBehaviour
     [SerializeField] private string _spawnTriggerLayerName = "Spawner";
     [SerializeField] private float _triggerInset = 0.5f;
 
+    [SerializeField] private GameObject _doorBlockPrefab;
+
     [Header("Hierarchy")]
     [SerializeField] private Transform _encounterRoot;
 
@@ -130,6 +132,10 @@ public class DungeonSpawnerBuilder : MonoBehaviour
         {
             spawner.SetTarget(_spawnTarget);
         }
+
+        // 출입구에 차단 벽 생성
+        List<GameObject> doorBlocks = CreateDoorBlocks(layout, room, encounterObject.transform);
+        spawner.SetBlocks(doorBlocks.ToArray());
 
         List<Transform> spawnPoints = CreateSpawnPoints(spawner, encounterObject.transform, candidates);
         if (spawnPoints.Count == 0)
@@ -390,5 +396,48 @@ public class DungeonSpawnerBuilder : MonoBehaviour
             int randomIndex = Random.Range(i, values.Count);
             (values[i], values[randomIndex]) = (values[randomIndex], values[i]);
         }
+    }
+
+    // 방의 출입구를 찾아 차단 벽을 생성하는 메서드
+    private List<GameObject> CreateDoorBlocks(DungeonLayout layout, DungeonRoom room, Transform parent)
+    {
+        List<GameObject> blocks = new List<GameObject>();
+        if (_doorBlockPrefab == null)
+            return blocks;
+
+        HashSet<Vector2Int> doorwayTiles = new HashSet<Vector2Int>();
+
+        // 1. 방의 가장자리(테두리) 및 코너 타일만 모읍니다.
+        HashSet<Vector2Int> edgeTiles = new HashSet<Vector2Int>();
+        edgeTiles.UnionWith(room.NearWallTilesUp);
+        edgeTiles.UnionWith(room.NearWallTilesDown);
+        edgeTiles.UnionWith(room.NearWallTilesLeft);
+        edgeTiles.UnionWith(room.NearWallTilesRight);
+        edgeTiles.UnionWith(room.CornerTiles);
+
+        // 2. 가장자리 타일에서 밖으로 한 칸 나갔을 때의 좌표를 검사합니다.
+        foreach (Vector2Int edgeTile in edgeTiles)
+        {
+            for (int i = 0; i < CARDINAL_DIRECTIONS.Length; i++)
+            {
+                Vector2Int outsideTile = edgeTile + CARDINAL_DIRECTIONS[i];
+
+                // 밖으로 나간 타일이 복도(Corridor)이면서, 방 내부 바닥(Floor)이 아닐 때만 정확한 출입구(1칸)로 판정합니다.
+                if (layout.CorridorTiles.Contains(outsideTile) && !room.FloorTiles.Contains(outsideTile))
+                {
+                    doorwayTiles.Add(outsideTile);
+                }
+            }
+        }
+
+        // 3. 찾은 정확한 출입구 타일에만 차단 벽을 생성합니다.
+        foreach (Vector2Int doorTile in doorwayTiles)
+        {
+            GameObject block = Instantiate(_doorBlockPrefab, TileToWorld(doorTile), Quaternion.identity, parent);
+            block.SetActive(false); // 초기 상태는 열려있음(비활성화)
+            blocks.Add(block);
+        }
+
+        return blocks;
     }
 }

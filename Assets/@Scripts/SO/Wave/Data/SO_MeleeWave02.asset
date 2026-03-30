@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d652a8ea9f4210b4883706b68cf7ae4a, type: 3}
-  m_Name: SO_Wave02
+  m_Name: SO_MeleeWave02
   m_EditorClassIdentifier: Assembly-CSharp::SO_WaveData
-  id: 1
+  id: 0
   enemyPrefabs:
-  - {fileID: 1494735616084423367, guid: 7d2801527192fb54398448a818f5db56, type: 3}
   - {fileID: 1494735616084423367, guid: 530dc4ba933cf2f4cbf4141e7e63bc6b, type: 3}
   - {fileID: 1494735616084423367, guid: 530dc4ba933cf2f4cbf4141e7e63bc6b, type: 3}
-  spawnSequentially: 0
-  spawnInterval: 1.2
+  - {fileID: 1494735616084423367, guid: 4ba7bd2e8929f5e4cada8926b85deb21, type: 3}
+  - {fileID: 1494735616084423367, guid: 4ba7bd2e8929f5e4cada8926b85deb21, type: 3}
+  spawnSequentially: 1
+  spawnInterval: 1.3
   isBossWave: 0

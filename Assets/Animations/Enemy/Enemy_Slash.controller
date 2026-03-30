@@ -32,7 +32,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Smear 01 Vertical 01_0
+  m_Name: Enemy_Slash
   serializedVersion: 5
   m_AnimatorParameters: []
   m_AnimatorLayers:
