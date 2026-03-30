@@ -185,7 +185,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
   m_Actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 3
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -283,6 +283,7 @@ MonoBehaviour:
   _weaponData: {fileID: 11400000, guid: 1f12dd4a7be5de845abf1d1da7ecda50, type: 2}
   _muzzle: {fileID: 4193519928300936348}
   _projectilePrefab: {fileID: 542514480668056525, guid: 30b8c9cd0c85fc1469becaab04a5223e, type: 3}
+  _cameraShake: {fileID: 0}
 --- !u!114 &8882870436773176198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -300,7 +301,6 @@ MonoBehaviour:
   _isDashingParam: IsDashing
   _isBackwardMoveParam: IsBackwardMove
   _deathTriggerParam: Dead
-  _idleStateName: Idle
   _backwardThreshold: -0.1
 --- !u!114 &7028847737993541401
 MonoBehaviour:
@@ -321,6 +321,7 @@ MonoBehaviour:
   _hitColor: {r: 1, g: 1, b: 1, a: 1}
   _hitFlashDuration: 0.1
   _blinkInterval: 0.1
+  _cameraShake: {fileID: 0}
 --- !u!114 &62471954421571731
 MonoBehaviour:
   m_ObjectHideFlags: 0

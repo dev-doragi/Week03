@@ -92,7 +92,8 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name != "StageScene")
+        bool isPlayableScene = scene.name == "StageScene" || scene.name == "TutorialScene";
+        if (!isPlayableScene)
             return;
 
         RebindStageReferences();

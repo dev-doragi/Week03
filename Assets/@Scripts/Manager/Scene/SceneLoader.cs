@@ -5,6 +5,7 @@ public class SceneLoader : MonoBehaviour
 {
     [SerializeField] private string _mainMenuSceneName = "MainMenu";
     [SerializeField] private string _gameplaySceneName = "StageScene";
+    [SerializeField] private string _tutorialSceneName = "TutorialScene";
 
     public void LoadMainMenu()
     {
@@ -16,6 +17,12 @@ public class SceneLoader : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadSceneAsync(_gameplaySceneName);
+    }
+
+    public void LoadTutorial()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadSceneAsync(_tutorialSceneName);
     }
 
     public void QuitGame()

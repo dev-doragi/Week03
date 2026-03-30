@@ -9,8 +9,6 @@ public class UI_Title : UI_Base
     [SerializeField] private Button _quitButton;
     [SerializeField] private SceneLoader _sceneLoader;
 
-    public event Action OnGuideRequested;
-
     protected override void BindUI()
     {
         if (_startButton != null)
@@ -43,7 +41,8 @@ public class UI_Title : UI_Base
 
     private void HandleGuideClicked()
     {
-        Debug.Log("[UI_Title] Guide 기능은 아직 TODO입니다.");
+        if (_sceneLoader != null)
+            _sceneLoader.LoadTutorial();
     }
 
     private void HandleQuitClicked()
