@@ -9,6 +9,8 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Transform _muzzle;
     [SerializeField] private PlayerProjectile _projectilePrefab;
 
+    [SerializeField] private CameraShakeModule _cameraShake;
+
     private PlayerController _controller;
     private float _lastAttackTime = -100f;
     private int _currentAmmo;
@@ -91,6 +93,8 @@ public class PlayerCombat : MonoBehaviour
             TryStartReload();
             return;
         }
+
+        _cameraShake.Play(0.15f);
 
         Fire();
 

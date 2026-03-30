@@ -3,28 +3,27 @@ using UnityEngine;
 
 public class UI_WeaponAmmo : MonoBehaviour
 {
-    [SerializeField] private PlayerCombat _playerCombat;
     [SerializeField] private TextMeshProUGUI _ammoText;
     [SerializeField] private GameObject _reloadText;
 
-    private void Start()
-    {
-        Bind(_playerCombat);
-    }
-
-    private void OnDestroy()
-    {
-        Unbind();
-    }
+    private PlayerCombat _playerCombat;
 
     public void Bind(PlayerCombat playerCombat)
     {
-        Unbind();
+        if (_playerCombat == playerCombat)
+        {
+            Refresh();
+            return;
+        }
 
+        Unbind();
         _playerCombat = playerCombat;
 
         if (_playerCombat == null)
+        {
+            ResetView();
             return;
+        }
 
         _playerCombat.OnAmmoChanged += HandleAmmoChanged;
         _playerCombat.OnReloadStateChanged += HandleReloadStateChanged;
@@ -34,20 +33,32 @@ public class UI_WeaponAmmo : MonoBehaviour
 
     public void Unbind()
     {
-        if (_playerCombat == null)
-            return;
+        if (_playerCombat != null)
+        {
+            _playerCombat.OnAmmoChanged -= HandleAmmoChanged;
+            _playerCombat.OnReloadStateChanged -= HandleReloadStateChanged;
+            _playerCombat = null;
+        }
 
-        _playerCombat.OnAmmoChanged -= HandleAmmoChanged;
-        _playerCombat.OnReloadStateChanged -= HandleReloadStateChanged;
-        _playerCombat = null;
+        ResetView();
+    }
+
+    public void Refresh()
+    {
+        if (_playerCombat == null)
+        {
+            ResetView();
+            return;
+        }
+
+        HandleAmmoChanged(_playerCombat.CurrentAmmo, _playerCombat.MaxAmmo);
+        HandleReloadStateChanged(_playerCombat.IsReloading);
     }
 
     private void HandleAmmoChanged(int currentAmmo, int maxAmmo)
     {
-        if (_ammoText == null)
-            return;
-
-        _ammoText.text = $"{currentAmmo} / {maxAmmo}";
+        if (_ammoText != null)
+            _ammoText.text = $"{currentAmmo} / {maxAmmo}";
     }
 
     private void HandleReloadStateChanged(bool isReloading)
@@ -56,12 +67,12 @@ public class UI_WeaponAmmo : MonoBehaviour
             _reloadText.SetActive(isReloading);
     }
 
-    private void Refresh()
+    private void ResetView()
     {
-        if (_playerCombat == null)
-            return;
+        if (_ammoText != null)
+            _ammoText.text = string.Empty;
 
-        HandleAmmoChanged(_playerCombat.CurrentAmmo, _playerCombat.MaxAmmo);
-        HandleReloadStateChanged(_playerCombat.IsReloading);
+        if (_reloadText != null)
+            _reloadText.SetActive(false);
     }
 }

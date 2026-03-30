@@ -5,27 +5,35 @@ public class UI_GameOver : UI_Base
 {
     [SerializeField] private Button _restartButton;
     [SerializeField] private Button _mainMenuButton;
+    [SerializeField] private SceneLoader _sceneLoader;
 
-    // 외부(UIManager 등)에서 구독할 이벤트
-    public event System.Action OnRetryRequested;
-    public event System.Action OnMainMenuRequested;
-
-    protected override void Awake()
+    protected override void BindUI()
     {
-        base.Awake(); // BindEvents 실행
+        if (_restartButton != null)
+            _restartButton.onClick.AddListener(HandleRestartClicked);
+
+        if (_mainMenuButton != null)
+            _mainMenuButton.onClick.AddListener(HandleMainMenuClicked);
     }
 
-    protected override void BindEvents()
+    protected override void UnbindUI()
     {
-        // 버튼 리스너 연결
-        _restartButton.onClick.AddListener(() => {
-            OnRetryRequested?.Invoke();
-            Debug.Log("Retry Clicked");
-        });
+        if (_restartButton != null)
+            _restartButton.onClick.RemoveListener(HandleRestartClicked);
 
-        _mainMenuButton.onClick.AddListener(() => {
-            OnMainMenuRequested?.Invoke();
-            Debug.Log("Main Menu Clicked");
-        });
+        if (_mainMenuButton != null)
+            _mainMenuButton.onClick.RemoveListener(HandleMainMenuClicked);
+    }
+
+    private void HandleRestartClicked()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.RestartGame();
+    }
+
+    private void HandleMainMenuClicked()
+    {
+        if (_sceneLoader != null)
+            _sceneLoader.LoadMainMenu();
     }
 }

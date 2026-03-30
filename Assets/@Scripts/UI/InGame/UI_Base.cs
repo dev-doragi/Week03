@@ -4,36 +4,72 @@ using UnityEngine.EventSystems;
 public abstract class UI_Base : MonoBehaviour
 {
     [Header("Navigation Settings")]
-    [SerializeField] protected GameObject _firstSelectable;
+    [SerializeField] private GameObject _firstSelectable;
+    [SerializeField] private bool _applyFirstSelectionOnEnable = true;
+
+    private bool _isBound;
 
     protected virtual void Awake()
     {
-        BindEvents();
+        CacheReferences();
     }
 
     protected virtual void OnEnable()
     {
-        // 패널 활성화 시 첫 버튼 선택 (패드 지원)
-        //ApplyFirstSelection();
+        BindBase();
+
+        if (_applyFirstSelectionOnEnable)
+            ApplyFirstSelection();
+
+        RefreshUI();
+    }
+
+    protected virtual void OnDisable()
+    {
+        UnbindBase();
+    }
+
+    protected virtual void OnDestroy()
+    {
+        UnbindBase();
     }
 
     public void ApplyFirstSelection()
     {
-        if (_firstSelectable != null && EventSystem.current != null)
-        {
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(_firstSelectable);
-        }
+        if (_firstSelectable == null || EventSystem.current == null)
+            return;
+
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(_firstSelectable);
     }
 
-    // 각 패널에서 구현할 버튼 리스너 연결부
-    protected abstract void BindEvents();
+    protected void BindBase()
+    {
+        if (_isBound)
+            return;
 
-    //// 필요 시 리스너 해제용
-    //protected abstract void UnbindEvents();
+        BindUI();
+        _isBound = true;
+    }
 
-    //protected virtual void OnDestroy()
-    //{
-    //    UnbindEvents();
-    //}
+    protected void UnbindBase()
+    {
+        if (!_isBound)
+            return;
+
+        UnbindUI();
+        _isBound = false;
+    }
+
+    protected void RebindBase()
+    {
+        UnbindBase();
+        BindBase();
+    }
+
+    protected virtual void CacheReferences() { }
+    protected virtual void RefreshUI() { }
+
+    protected abstract void BindUI();
+    protected abstract void UnbindUI();
 }

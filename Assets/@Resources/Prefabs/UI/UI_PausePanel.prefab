@@ -293,9 +293,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI_PausePanel
   _firstSelectable: {fileID: 5623686762137662175}
+  _applyFirstSelectionOnEnable: 1
   _resumeButton: {fileID: 5364565023516845533}
   _retryButton: {fileID: 3551416192182875463}
   _mainMenuButton: {fileID: 2819076056967686209}
+  _sceneLoader: {fileID: 0}
 --- !u!1 &1938650234030331493
 GameObject:
   m_ObjectHideFlags: 0
@@ -710,19 +712,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3042262263092751355}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: RestartGame
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &4811350045442698488
 GameObject:
   m_ObjectHideFlags: 0
@@ -982,12 +972,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+        m_TargetAssemblyTypeName: PauseController, Assembly-CSharp
+        m_MethodName: ResumeGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 

@@ -23,6 +23,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [SerializeField] private Color _hitColor = Color.red;
     [SerializeField] private float _hitFlashDuration = 0.1f;
     [SerializeField] private float _blinkInterval = 0.1f;
+    [SerializeField] private CameraShakeModule _cameraShake;
 
     private PlayerController _controller;
     private Coroutine _invincibleRoutine;
@@ -84,6 +85,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         _currentHp = Mathf.Max(0, _currentHp - damage);
 
         OnHit?.Invoke(damage);
+
+        _cameraShake.Play(0.15f);
         _hapticManager?.PlayPlayerHit();
 
         if (_currentHp <= 0)

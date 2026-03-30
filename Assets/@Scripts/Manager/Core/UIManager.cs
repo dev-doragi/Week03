@@ -1,4 +1,3 @@
-// 5. UIManager.cs
 using UnityEngine;
 
 public class UIManager : MonoBehaviour, IInitializable
@@ -13,8 +12,6 @@ public class UIManager : MonoBehaviour, IInitializable
     [SerializeField] private UI_HUD _uiHud;
 
     private GameStateManager _gameStateManager;
-    private PauseController _pauseController;
-    private PoolManager _poolManager;
 
     public void Initialize()
     {
@@ -27,67 +24,32 @@ public class UIManager : MonoBehaviour, IInitializable
             return;
         }
 
-        ManagerRegistry.TryGet(out _pauseController);
-        ManagerRegistry.TryGet(out _poolManager);
-
         _gameStateManager.OnStateChanged += HandleStateChanged;
-        BindPanelEvents();
-        RebindUI();
 
         IsInitialized = true;
     }
 
-    public void RebindUI()
+    public void RebindSceneUI()
     {
-        if (_uiHud != null)
+        _uiPausePanel = FindAnyObjectByType<UI_Pause>(FindObjectsInactive.Include);
+        _uiGameOverPanel = FindAnyObjectByType<UI_GameOver>(FindObjectsInactive.Include);
+        _uiHud = FindAnyObjectByType<UI_HUD>(FindObjectsInactive.Include);
+
+        HideOverlayPanels();
+    }
+
+    public void RebindUI(PlayerHealth playerHealth, PlayerCombat playerCombat)
+    {
+        if (_uiHud == null)
+            return;
+
+        if (playerHealth == null || playerCombat == null)
         {
             _uiHud.Unbind();
-        }
-
-        PlayerController playerController = FindAnyObjectByType<PlayerController>();
-        if (playerController == null)
-        {
-            Debug.LogWarning("UIManager.RebindUI: PlayerController not found.");
             return;
         }
 
-        PlayerHealth playerHealth = playerController.GetComponent<PlayerHealth>();
-        PlayerCombat playerCombat = playerController.GetComponent<PlayerCombat>();
-
-        if (_uiHud != null)
-        {
-            _uiHud.Bind(playerHealth, playerCombat);
-        }
-    }
-
-    private void BindPanelEvents()
-    {
-        if (_uiPausePanel != null)
-        {
-            _uiPausePanel.OnRetryRequested += HandleRetryRequested;
-            _uiPausePanel.OnMainMenuRequested += HandleMainMenuRequested;
-        }
-
-        if (_uiGameOverPanel != null)
-        {
-            _uiGameOverPanel.OnRetryRequested += HandleRetryRequested;
-            _uiGameOverPanel.OnMainMenuRequested += HandleMainMenuRequested;
-        }
-    }
-
-    private void UnbindPanelEvents()
-    {
-        if (_uiPausePanel != null)
-        {
-            _uiPausePanel.OnRetryRequested -= HandleRetryRequested;
-            _uiPausePanel.OnMainMenuRequested -= HandleMainMenuRequested;
-        }
-
-        if (_uiGameOverPanel != null)
-        {
-            _uiGameOverPanel.OnRetryRequested -= HandleRetryRequested;
-            _uiGameOverPanel.OnMainMenuRequested -= HandleMainMenuRequested;
-        }
+        _uiHud.Bind(playerHealth, playerCombat);
     }
 
     private void HandleStateChanged(GameState state)
@@ -108,18 +70,6 @@ public class UIManager : MonoBehaviour, IInitializable
         }
     }
 
-    private void HandleRetryRequested()
-    {
-        _gameStateManager.ChangeState(GameState.Respawning);
-        _pauseController?.ResumeGame();
-        _poolManager?.ClearRuntimeObjects();
-    }
-
-    private void HandleMainMenuRequested()
-    {
-        _poolManager?.ClearRuntimeObjects();
-    }
-
     public void ShowPause()
     {
         if (_uiPausePanel != null)
@@ -134,11 +84,14 @@ public class UIManager : MonoBehaviour, IInitializable
 
     public void ShowGameOver()
     {
+        if (_uiGameOverPanel != null)
+        {
+            _uiGameOverPanel.gameObject.SetActive(true);
+            _uiGameOverPanel.ApplyFirstSelection();
+        }
+
         if (_uiPausePanel != null)
             _uiPausePanel.gameObject.SetActive(false);
-
-        if (_uiGameOverPanel != null)
-            _uiGameOverPanel.gameObject.SetActive(true);
     }
 
     public void HideOverlayPanels()
@@ -154,8 +107,6 @@ public class UIManager : MonoBehaviour, IInitializable
     {
         if (_gameStateManager != null)
             _gameStateManager.OnStateChanged -= HandleStateChanged;
-
-        UnbindPanelEvents();
 
         if (_uiHud != null)
             _uiHud.Unbind();

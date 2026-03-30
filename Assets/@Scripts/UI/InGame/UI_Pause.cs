@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class UI_Pause : UI_Base
@@ -9,57 +7,53 @@ public class UI_Pause : UI_Base
     [SerializeField] private Button _resumeButton;
     [SerializeField] private Button _retryButton;
     [SerializeField] private Button _mainMenuButton;
+    [SerializeField] private SceneLoader _sceneLoader;
 
     private PauseController _pauseController;
-    private InputManager _inputManager;
-    private GameStateManager _gameStateManager;
 
-    public event System.Action OnRetryRequested;
-    public event System.Action OnMainMenuRequested;
-
-    protected override void Awake()
+    protected override void CacheReferences()
     {
         ManagerRegistry.TryGet(out _pauseController);
-        ManagerRegistry.TryGet(out _inputManager);
-        ManagerRegistry.TryGet(out _gameStateManager);
-
-        base.Awake();
     }
 
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-
-        if (_inputManager != null)
-            _inputManager.OnCancel += HandleCancel;
-    }
-
-    protected override void BindEvents()
+    protected override void BindUI()
     {
         if (_resumeButton != null)
-            _resumeButton.onClick.AddListener(() => _pauseController?.ResumeGame());
+            _resumeButton.onClick.AddListener(HandleResumeClicked);
 
         if (_retryButton != null)
-            _retryButton.onClick.AddListener(() => OnRetryRequested?.Invoke());
+            _retryButton.onClick.AddListener(HandleRetryClicked);
 
         if (_mainMenuButton != null)
-            _mainMenuButton.onClick.AddListener(() => OnMainMenuRequested?.Invoke());
+            _mainMenuButton.onClick.AddListener(HandleMainMenuClicked);
     }
 
-    private void HandleCancel(InputAction.CallbackContext ctx)
+    protected override void UnbindUI()
     {
-        if (!ctx.started)
-            return;
+        if (_resumeButton != null)
+            _resumeButton.onClick.RemoveListener(HandleResumeClicked);
 
-        if (_gameStateManager != null && _gameStateManager.CurrentState != GameState.Paused)
-            return;
-        EventSystem.current?.SetSelectedGameObject(null);
+        if (_retryButton != null)
+            _retryButton.onClick.RemoveListener(HandleRetryClicked);
+
+        if (_mainMenuButton != null)
+            _mainMenuButton.onClick.RemoveListener(HandleMainMenuClicked);
+    }
+
+    private void HandleResumeClicked()
+    {
         _pauseController?.ResumeGame();
     }
 
-    private void OnDisable()
+    private void HandleRetryClicked()
     {
-        if (_inputManager != null)
-            _inputManager.OnCancel -= HandleCancel;
+        if (GameManager.Instance != null)
+            GameManager.Instance.RestartGame();
+    }
+
+    private void HandleMainMenuClicked()
+    {
+        if (_sceneLoader != null)
+            _sceneLoader.LoadMainMenu();
     }
 }

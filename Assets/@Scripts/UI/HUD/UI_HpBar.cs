@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class UI_HpBar : MonoBehaviour
 {
-    [SerializeField] private PlayerHealth _playerHealth;
     [SerializeField] private RectTransform _bar;
 
     [Header("Heart Prefabs")]
@@ -17,37 +16,31 @@ public class UI_HpBar : MonoBehaviour
     [SerializeField] private float _growDuration = 0.18f;
 
     private HeartSlot[] _slots;
+    private PlayerHealth _playerHealth;
     private int _currentHp;
     private int _maxHp;
 
-    private void Start()
-    {
-        if (_playerHealth != null)
-            Bind(_playerHealth);
-    }
-
-    private void OnDestroy()
-    {
-        Unbind();
-    }
-
     public void Bind(PlayerHealth playerHealth)
     {
-        Unbind();
+        if (_playerHealth == playerHealth)
+        {
+            Refresh();
+            return;
+        }
 
+        Unbind();
         _playerHealth = playerHealth;
 
         if (_playerHealth == null)
+        {
+            ClearSlots();
             return;
-
-        _maxHp = _playerHealth.MaxHp;
-        _currentHp = _playerHealth.CurrentHp;
-
-        CreateSlots(_maxHp);
-        RefreshImmediate();
+        }
 
         _playerHealth.OnHit += HandleHit;
         _playerHealth.OnHeal += HandleHeal;
+
+        Refresh();
     }
 
     public void Unbind()
@@ -60,10 +53,26 @@ public class UI_HpBar : MonoBehaviour
         }
     }
 
+    public void Refresh()
+    {
+        if (_playerHealth == null)
+        {
+            ClearSlots();
+            return;
+        }
+
+        _maxHp = _playerHealth.MaxHp;
+        _currentHp = _playerHealth.CurrentHp;
+
+        if (_slots == null || _slots.Length != _maxHp)
+            CreateSlots(_maxHp);
+
+        RefreshImmediate();
+    }
+
     private void CreateSlots(int count)
     {
-        foreach (Transform child in _bar)
-            Destroy(child.gameObject);
+        ClearSlots();
 
         _slots = new HeartSlot[count];
 
@@ -88,6 +97,22 @@ public class UI_HpBar : MonoBehaviour
                 filledTransform.localScale,
                 emptyTransform.localScale);
         }
+    }
+
+    private void ClearSlots()
+    {
+        if (_bar == null)
+            return;
+
+        foreach (Transform child in _bar)
+        {
+            child.DOKill();
+            Destroy(child.gameObject);
+        }
+
+        _slots = null;
+        _currentHp = 0;
+        _maxHp = 0;
     }
 
     private void RefreshImmediate()

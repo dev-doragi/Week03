@@ -83,7 +83,7 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 #if UNITY_EDITOR
         if (_autoStartInEditor)
         {
-            StartGame();
+            //StartGame();
         }
 #else
         StartGame();
@@ -92,7 +92,38 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        BindPlayer();
+        if (scene.name != "StageScene")
+            return;
+
+        RebindStageReferences();
+        _uiManager?.RebindSceneUI();
+        StartCoroutine(CoStartStageNextFrame()); //  바인딩이 끝날때 까지 1프레임 기달려서 오류를 방지 (안좋은 방식, 나중에 고쳐야함)
+    }
+
+    private IEnumerator CoStartStageNextFrame()
+    {
+        yield return null;
+        StartGame();
+    }
+
+    private void RebindStageReferences()
+    {
+        if (_dungeonGenerator != null)
+        {
+            _dungeonGenerator.OnDungeonGenerated -= HandleDungeonGenerated;
+        }
+
+        _dungeonGenerator = FindAnyObjectByType<DungeonGenerator>();
+        _dungeonSpawnerBuilder = FindAnyObjectByType<DungeonSpawnerBuilder>();
+
+        if (_dungeonGenerator != null)
+        {
+            _dungeonGenerator.OnDungeonGenerated += HandleDungeonGenerated;
+        }
+        else
+        {
+            Debug.LogError("DungeonGenerator not found.");
+        }
     }
 
     private void OnDestroy()
@@ -242,22 +273,8 @@ public class GameManager : PersistentMonoSingleton<GameManager>
     {
         BindPlayer();
 
-        if (_playerController == null)
-        {
-            Debug.LogError("PlayerController not found after dungeon generation.");
+        if (_playerController == null || _playerHealth == null || _playerCombat == null)
             return;
-        }
-
-        if (_playerHealth == null)
-        {
-            Debug.LogError("PlayerHealth not found after dungeon generation.");
-            return;
-        }
-
-        if (_uiManager != null)
-        {
-            _uiManager.RebindUI();
-        }
 
         Vector3 spawnPosition = GetPlayerSpawnPosition();
 
@@ -277,16 +294,16 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
         PlayerAnimController animController = _playerController.GetComponent<PlayerAnimController>();
         if (animController != null)
-        {
             animController.ResetAnimationState();
-        }
 
         _playerController.gameObject.SetActive(true);
 
+        // 플레이어 리셋 후 UI 재 바인딩
+        _uiManager?.RebindSceneUI();
+        _uiManager?.RebindUI(_playerHealth, _playerCombat);
+
         SetPlayerControlEnabled(true);
         _gameStateManager.ChangeState(GameState.Playing);
-
-        Debug.Log("Dungeon generated and player initialized.");
     }
 
     private Vector3 GetPlayerSpawnPosition()

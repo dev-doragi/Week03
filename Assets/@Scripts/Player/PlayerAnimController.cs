@@ -13,7 +13,7 @@ public class PlayerAnimController : MonoBehaviour
     [SerializeField] private string _deathTriggerParam = "Dead";
 
     [Header("State Names")]
-    [SerializeField] private string _idleStateName = "Idle";
+    [SerializeField] private string _idleStateName = "Player_Idle";
 
     [Header("Backward Move")]
     [SerializeField] private float _backwardThreshold = -0.1f;
@@ -91,6 +91,6 @@ public class PlayerAnimController : MonoBehaviour
         _animator.SetBool(_isDashingParam, false);
         _animator.SetBool(_isBackwardMoveParam, false);
         _animator.ResetTrigger(_deathTriggerParam);
-        _animator.Play(_idleStateName, 0, 0f);
+        //_animator.Play(_idleStateName, 0, 0f);
     }
 }
