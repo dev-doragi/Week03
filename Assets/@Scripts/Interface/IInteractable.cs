@@ -1,0 +1,9 @@
+using UnityEngine;
+
+public interface IInteractable
+{
+    void Interact(GameObject interactor);
+    string GetInteractionText();
+    void ShowOutline(bool show);
+    Transform GetUIPivot();
+}

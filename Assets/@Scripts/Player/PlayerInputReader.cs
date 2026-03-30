@@ -14,6 +14,8 @@ public class PlayerInputReader : MonoBehaviour
     private const string ATTACK_ACTION = "Attack";
     private const string DASH_ACTION = "Dash";
     private const string RELOAD_ACTION = "Reload";
+    private const string INTERACT_ACTION = "Interact";
+
     private const string GAMEPAD_SCHEME = "Gamepad";
 
     private PlayerInput _playerInput;
@@ -22,6 +24,7 @@ public class PlayerInputReader : MonoBehaviour
     private InputAction _attackAction;
     private InputAction _dashAction;
     private InputAction _reloadAction;
+    private InputAction _interactAction;
 
     private InputAction _pauseAction;
 
@@ -38,6 +41,7 @@ public class PlayerInputReader : MonoBehaviour
         _attackAction = playerActionMap.FindAction(ATTACK_ACTION, true);
         _dashAction = playerActionMap.FindAction(DASH_ACTION, true);
         _reloadAction = playerActionMap.FindAction(RELOAD_ACTION, true);
+        _interactAction = playerActionMap.FindAction(INTERACT_ACTION, true);
 
         InputActionMap systemActionMap = _playerInput.actions.FindActionMap(SYSTEM_ACTION_MAP, true);
         _pauseAction = systemActionMap.FindAction(PAUSE_ACTION_MAP, true);
@@ -66,6 +70,11 @@ public class PlayerInputReader : MonoBehaviour
     public bool WasReloadPressedThisFrame()
     {
         return _reloadAction.WasPressedThisFrame();
+    }
+
+    public bool WasInteractPressedThisFrame()
+    {
+        return _interactAction.WasPressedThisFrame();
     }
 
     public bool WasPausePressedThisFrame()

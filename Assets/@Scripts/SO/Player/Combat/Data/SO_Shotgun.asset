@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4677ceca549c6d429a043aae74afab8, type: 3}
   m_Name: SO_Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSO
-  <AttackInterval>k__BackingField: 1.2
+  <AttackInterval>k__BackingField: 1.5
   <Damage>k__BackingField: 1
   <ProjectileSpeed>k__BackingField: 8
   <ProjectileLifetime>k__BackingField: 1
@@ -20,5 +20,5 @@ MonoBehaviour:
   <ReloadDuration>k__BackingField: 1.75
   <ProjectilePrefab>k__BackingField: {fileID: 5659828644058746940, guid: ab833ea123f49a741b8a6fdc1440e197, type: 3}
   <SpreadAngle>k__BackingField: 35
-  <PelletCount>k__BackingField: 5
+  <PelletCount>k__BackingField: 7
   <WeaponPrefab>k__BackingField: {fileID: 7553991377772159881, guid: 3244e419248d3a24687d9dfd3cc8dcfe, type: 3}

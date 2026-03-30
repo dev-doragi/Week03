@@ -157,8 +157,8 @@ TextureImporter:
       name: Weapon_ex3_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 42
+        x: 1
+        y: 43
         width: 18
         height: 9
       alignment: 0
@@ -179,8 +179,8 @@ TextureImporter:
       name: Weapon_ex3_1
       rect:
         serializedVersion: 2
-        x: 19
-        y: 42
+        x: 20
+        y: 43
         width: 18
         height: 9
       alignment: 0
@@ -201,8 +201,8 @@ TextureImporter:
       name: Weapon_ex3_2
       rect:
         serializedVersion: 2
-        x: 38
-        y: 42
+        x: 39
+        y: 43
         width: 18
         height: 9
       alignment: 0
@@ -223,8 +223,8 @@ TextureImporter:
       name: Weapon_ex3_3
       rect:
         serializedVersion: 2
-        x: 0
-        y: 32
+        x: 1
+        y: 33
         width: 18
         height: 9
       alignment: 0
@@ -245,8 +245,8 @@ TextureImporter:
       name: Weapon_ex3_4
       rect:
         serializedVersion: 2
-        x: 19
-        y: 32
+        x: 20
+        y: 33
         width: 18
         height: 9
       alignment: 0
@@ -267,8 +267,8 @@ TextureImporter:
       name: Weapon_ex3_5
       rect:
         serializedVersion: 2
-        x: 38
-        y: 32
+        x: 39
+        y: 33
         width: 18
         height: 9
       alignment: 0
@@ -281,6 +281,72 @@ TextureImporter:
       bones: []
       spriteID: e48847a30772a5480800000000000000
       internalID: -8909765549828569010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Weapon_ex3_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 23
+        width: 20
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7e60f0f90e889244c80a71bc2f755518
+      internalID: -156750005927826490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Weapon_ex3_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 12
+        width: 20
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7baf46d34720370469b08e89441810c1
+      internalID: 1410592133126274865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Weapon_ex3_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2
+        width: 20
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90ea3940f874fb14c93e44513775355d
+      internalID: 4266876228782321393
       vertices: []
       indices: 
       edges: []
@@ -299,15 +365,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":18.0,"y":9.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":1.0,"y":1.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":18.0,"y":9.0},"gridSpriteOffset":{"x":1.0,"y":1.0},"gridSpritePadding":{"x":1.0,"y":1.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Weapon_ex3_0: -9176911175357451857
       Weapon_ex3_1: 3534936629220626721
-      Weapon_ex3_10: 654614327316010877
-      Weapon_ex3_11: 8573827296392420927
-      Weapon_ex3_12: 7682118297995684847
-      Weapon_ex3_13: -8194974465536482196
-      Weapon_ex3_14: -5996182166990566352
       Weapon_ex3_2: -2528165199383912634
       Weapon_ex3_3: -508508718728349100
       Weapon_ex3_4: 4943373715194747912
@@ -315,7 +376,6 @@ TextureImporter:
       Weapon_ex3_6: -156750005927826490
       Weapon_ex3_7: 1410592133126274865
       Weapon_ex3_8: 4266876228782321393
-      Weapon_ex3_9: -953172605634819377
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

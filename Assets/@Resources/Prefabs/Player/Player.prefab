@@ -52,6 +52,7 @@ GameObject:
   - component: {fileID: 8882870436773176198}
   - component: {fileID: 7028847737993541401}
   - component: {fileID: 62471954421571731}
+  - component: {fileID: 2039671826682315867}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -306,6 +307,18 @@ MonoBehaviour:
   _lifeTime: 0.15
   _afterImageColor: {r: 1, g: 1, b: 1, a: 0.5}
   _sortingOrderOffset: -1
+--- !u!114 &2039671826682315867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2658700659945703271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1a50903cb719164b8642f2fdd1b510f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
 --- !u!1 &8059926379864360768
 GameObject:
   m_ObjectHideFlags: 0
