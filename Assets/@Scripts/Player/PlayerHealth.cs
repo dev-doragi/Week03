@@ -15,6 +15,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     [Header("Invincibility")]
     [SerializeField] private float _invincibleDuration = 1.5f;
+    [SerializeField] private string _invincibleLayer = "Invincible";
+    private int _originalLayer;
     private bool _isInvincible;
     private HapticManager _hapticManager;
 
@@ -43,6 +45,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private void Awake()
     {
         _controller = GetComponent<PlayerController>();
+        _originalLayer = gameObject.layer;
 
         if (_spriteRenderer == null)
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -152,6 +155,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private void StopInvincible()
     {
         _isInvincible = false;
+        gameObject.layer = _originalLayer;
 
         if (_invincibleRoutine != null)
         {
@@ -169,8 +173,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private IEnumerator InvincibleRoutine()
     {
         _isInvincible = true;
+        gameObject.layer = LayerMask.NameToLayer(_invincibleLayer);
         yield return new WaitForSeconds(_invincibleDuration);
         _isInvincible = false;
+        gameObject.layer = _originalLayer;
         _invincibleRoutine = null;
     }
 

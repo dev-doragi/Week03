@@ -20,6 +20,7 @@ MonoBehaviour:
     - 0bfc8d7982f7b934d829265fab4dbbad
     - bba7c5902b57ed14dbfc399640c0ca29
     - a1f897584d08b91469845e410310c6fe
+    - 887598f06d54d0b4093266ab3141e3c2
     values:
     - goDatas_byGlobalId:
         keys:
@@ -294,6 +295,54 @@ MonoBehaviour:
           iconNameOrGuid: Camera Icon
           isIconRecursive: 0
           isColorRecursive: 0
+    - goDatas_byGlobalId:
+        keys:
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-770911631-0
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-1674139578-0
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-1127704566-0
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-2658700659945703271-3781954488073005085
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-1044378678-0
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-619394800-0
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-519420028-0
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-1354608135-0
+        - globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-293099525-0
+        values:
+        - colorIndex: 0
+          iconNameOrGuid: EventSystem Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Canvas Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Terrain Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: AvatarMask On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Light Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Camera Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Camera Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Camera Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
   bookmarks:
   - _go: {fileID: 0}
     globalId:
@@ -331,4 +380,10 @@ MonoBehaviour:
   - _go: {fileID: 0}
     globalId:
       globalObjectIdString: GlobalObjectId_V1-2-a1f897584d08b91469845e410310c6fe-1127704566-0
+  - _go: {fileID: 0}
+    globalId:
+      globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-770911631-0
+  - _go: {fileID: 0}
+    globalId:
+      globalObjectIdString: GlobalObjectId_V1-2-887598f06d54d0b4093266ab3141e3c2-1127704566-0
   bookmarkedScenePaths: []

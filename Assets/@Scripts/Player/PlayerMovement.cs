@@ -5,7 +5,9 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     private const float MIN_INPUT_SQR = 0.0001f;
+    private int _originalLayer;
 
+    [SerializeField] private string _invincibleLayer = "Invincible";
     [SerializeField] private PlayerMovementSO _movementData;
 
     private PlayerController _controller;
@@ -15,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         _controller = GetComponent<PlayerController>();
+        _originalLayer = gameObject.layer;
     }
 
     public void HandleMove()
@@ -71,6 +74,7 @@ public class PlayerMovement : MonoBehaviour
             _dashRoutine = null;
         }
 
+        gameObject.layer = _originalLayer;
         _controller.SetDashing(false);
         _controller.SetInvincible(false);
         _controller.Rigidbody.linearVelocity = Vector2.zero;
@@ -82,6 +86,8 @@ public class PlayerMovement : MonoBehaviour
         _controller.SetDashing(true);
         _controller.SetInvincible(_movementData.DashInvincible);
 
+        gameObject.layer = LayerMask.NameToLayer(_invincibleLayer);
+
         float elapsed = 0f;
         while (elapsed < _movementData.DashDuration)
         {
@@ -91,6 +97,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         _controller.Rigidbody.linearVelocity = Vector2.zero;
+
+        gameObject.layer = _originalLayer;
         _controller.SetInvincible(false);
         _controller.SetDashing(false);
         _dashRoutine = null;

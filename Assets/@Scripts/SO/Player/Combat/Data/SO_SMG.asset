@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSO
   <AttackInterval>k__BackingField: 0.15
   <Damage>k__BackingField: 1
-  <ProjectileSpeed>k__BackingField: 15
+  <ProjectileSpeed>k__BackingField: 14
   <ProjectileLifetime>k__BackingField: 0.75
-  <MaxAmmo>k__BackingField: 35
-  <ReloadDuration>k__BackingField: 2
+  <MaxAmmo>k__BackingField: 25
+  <ReloadDuration>k__BackingField: 2.2
   <ProjectilePrefab>k__BackingField: {fileID: 5659828644058746940, guid: ab833ea123f49a741b8a6fdc1440e197, type: 3}
   <SpreadAngle>k__BackingField: 0
   <PelletCount>k__BackingField: 1

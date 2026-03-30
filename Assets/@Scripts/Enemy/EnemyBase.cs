@@ -51,6 +51,7 @@ public abstract class EnemyBase : EntityBase
     {
         base.ResetEntityState();
 
+        _target = null;
         _isAttacking = false;
         _nextAttackTime = 0f;
         _hasMoveDirection = false;
@@ -133,7 +134,7 @@ public abstract class EnemyBase : EntityBase
             finalDirection.Normalize();
         }
 
-        _rb.linearVelocity = finalDirection * _enemyData.MoveSpeed;
+        _rb.linearVelocity = finalDirection * _enemyData.MoveSpeed; // 보스 Charge 공격 중에 덮어씌워지는 문제
     }
 
     protected virtual bool CanEngage(float distance)

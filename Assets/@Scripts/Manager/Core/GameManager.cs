@@ -21,34 +21,15 @@ public class GameManager : PersistentMonoSingleton<GameManager>
     [SerializeField] private float _deathSlowTimeScale = 0.5f;
     [SerializeField] private float _deathSequenceDuration = 0.75f;
 
+    [Header("Clear Sequence")]
+    [SerializeField] private float _clearSlowTimeScale = 0.5f;
+    [SerializeField] private float _clearSequenceDuration = 0.75f;
+
     private PlayerController _playerController;
     private PlayerHealth _playerHealth;
     private PlayerCombat _playerCombat;
     private Coroutine _deathRoutine;
-
-    #region Debugging
-    [ContextMenu("Debug Die")]
-    private void DebugDie()
-    {
-        if (_playerHealth == null)
-        {
-            Debug.LogWarning("PlayerHealth not found.");
-            return;
-        }
-
-        _playerHealth.TakeDamage(9999);
-    }
-
-    [ContextMenu("Debug Restart")]
-    private void DebugRestart()
-    {
-#if UNITY_EDITOR
-        DebugRestartGame();
-#else
-        RestartGame();
-#endif
-    }
-    #endregion
+    private Coroutine _clearRoutine;
 
     protected override void OnInitialized()
     {
@@ -59,23 +40,8 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        if (_dungeonGenerator != null)
-        {
-            _dungeonGenerator.OnDungeonGenerated += HandleDungeonGenerated;
-        }
-        else
-        {
-            Debug.LogWarning("DungeonGenerator is not assigned.");
-        }
-
-        if (_dungeonSpawnerBuilder == null)
-        {
-            _dungeonSpawnerBuilder = FindAnyObjectByType<DungeonSpawnerBuilder>();
-        }
-
+        SubscribeDungeonEvents();
         BindPlayer();
-
-        Debug.Log("GameManager Initialized");
     }
 
     private void Start()
@@ -83,7 +49,6 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 #if UNITY_EDITOR
         if (_autoStartInEditor)
         {
-            //StartGame();
         }
 #else
         StartGame();
@@ -98,7 +63,7 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
         RebindStageReferences();
         _uiManager?.RebindSceneUI();
-        StartCoroutine(CoStartStageNextFrame()); //  바인딩이 끝날때 까지 1프레임 기달려서 오류를 방지 (안좋은 방식, 나중에 고쳐야함)
+        StartCoroutine(CoStartStageNextFrame());
     }
 
     private IEnumerator CoStartStageNextFrame()
@@ -109,37 +74,47 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
     private void RebindStageReferences()
     {
-        if (_dungeonGenerator != null)
-        {
-            _dungeonGenerator.OnDungeonGenerated -= HandleDungeonGenerated;
-        }
+        UnsubscribeDungeonEvents();
 
         _dungeonGenerator = FindAnyObjectByType<DungeonGenerator>();
         _dungeonSpawnerBuilder = FindAnyObjectByType<DungeonSpawnerBuilder>();
 
+        SubscribeDungeonEvents();
+    }
+
+    private void SubscribeDungeonEvents()
+    {
         if (_dungeonGenerator != null)
-        {
             _dungeonGenerator.OnDungeonGenerated += HandleDungeonGenerated;
-        }
-        else
-        {
-            Debug.LogError("DungeonGenerator not found.");
-        }
+
+        if (_dungeonSpawnerBuilder != null)
+            _dungeonSpawnerBuilder.OnBossRoomCleared += HandleBossRoomCleared;
+    }
+
+    private void UnsubscribeDungeonEvents()
+    {
+        if (_dungeonGenerator != null)
+            _dungeonGenerator.OnDungeonGenerated -= HandleDungeonGenerated;
+
+        if (_dungeonSpawnerBuilder != null)
+            _dungeonSpawnerBuilder.OnBossRoomCleared -= HandleBossRoomCleared;
     }
 
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-
-        if (_dungeonGenerator != null)
-        {
-            _dungeonGenerator.OnDungeonGenerated -= HandleDungeonGenerated;
-        }
+        UnsubscribeDungeonEvents();
 
         if (_deathRoutine != null)
         {
             StopCoroutine(_deathRoutine);
             _deathRoutine = null;
+        }
+
+        if (_clearRoutine != null)
+        {
+            StopCoroutine(_clearRoutine);
+            _clearRoutine = null;
         }
 
         UnbindPlayer();
@@ -220,9 +195,7 @@ public class GameManager : PersistentMonoSingleton<GameManager>
             return;
 
         if (_dungeonSpawnerBuilder != null)
-        {
             _dungeonSpawnerBuilder.SetSpawnTarget(_playerController.transform);
-        }
 
         _playerHealth.OnDeathStarted += HandleDeath;
     }
@@ -230,9 +203,7 @@ public class GameManager : PersistentMonoSingleton<GameManager>
     private void UnbindPlayer()
     {
         if (_playerHealth != null)
-        {
             _playerHealth.OnDeathStarted -= HandleDeath;
-        }
 
         _playerHealth = null;
         _playerCombat = null;
@@ -258,7 +229,11 @@ public class GameManager : PersistentMonoSingleton<GameManager>
             _deathRoutine = null;
         }
 
-        Debug.Log("Run Setup Begin");
+        if (_clearRoutine != null)
+        {
+            StopCoroutine(_clearRoutine);
+            _clearRoutine = null;
+        }
 
         Time.timeScale = 1f;
         _poolManager?.ClearRuntimeObjects();
@@ -291,7 +266,7 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
         _playerHealth.ResetHp();
         _playerController.ResetRuntimeState();
-        _playerCombat.InitializeAmmo();
+        _playerCombat.ResetForNewRun();
 
         PlayerAnimController animController = _playerController.GetComponent<PlayerAnimController>();
         if (animController != null)
@@ -299,7 +274,6 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
         _playerController.gameObject.SetActive(true);
 
-        // 플레이어 리셋 후 UI 재 바인딩
         _uiManager?.RebindSceneUI();
         _uiManager?.RebindUI(_playerHealth, _playerCombat);
 
@@ -319,17 +293,13 @@ public class GameManager : PersistentMonoSingleton<GameManager>
     private void HandleDeath()
     {
         if (_deathRoutine != null)
-        {
             StopCoroutine(_deathRoutine);
-        }
 
         _deathRoutine = StartCoroutine(CoHandleDeath());
     }
 
     private IEnumerator CoHandleDeath()
     {
-        Debug.Log("Player Die");
-
         SetPlayerControlEnabled(false);
         _gameStateManager.ChangeState(GameState.Death);
         Time.timeScale = _deathSlowTimeScale;
@@ -340,6 +310,29 @@ public class GameManager : PersistentMonoSingleton<GameManager>
         Time.timeScale = 0f;
 
         _deathRoutine = null;
+    }
+
+    private void HandleBossRoomCleared()
+    {
+        if (_clearRoutine != null)
+            return;
+
+        if (_deathRoutine != null)
+            return;
+
+        _clearRoutine = StartCoroutine(CoHandleClear());
+    }
+
+    private IEnumerator CoHandleClear()
+    {
+        SetPlayerControlEnabled(false);
+        _gameStateManager.ChangeState(GameState.Clear);
+        Time.timeScale = _clearSlowTimeScale;
+
+        yield return new WaitForSecondsRealtime(_clearSequenceDuration);
+
+        Time.timeScale = 0f;
+        _clearRoutine = null;
     }
 
     public void SetPlayerControlEnabled(bool enabled)
@@ -375,7 +368,7 @@ public class GameManager : PersistentMonoSingleton<GameManager>
 
         _playerController.ResetRuntimeState();
         _playerHealth.ResetHp();
-        _playerCombat.InitializeAmmo();
+        _playerCombat.ResetForNewRun();
         _playerController.gameObject.SetActive(true);
 
         SetPlayerControlEnabled(true);

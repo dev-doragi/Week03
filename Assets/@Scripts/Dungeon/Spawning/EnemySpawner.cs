@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,14 @@ public class EnemySpawner : MonoBehaviour
 {
     [Header("Wave Data")]
     [SerializeField] private List<SO_WaveData> _waveDatas = new();
+
+    [Header("Boss Room")]
+    [SerializeField] private bool _isBossRoom = false;
+    [SerializeField] private EnemyBase _bossPrefab;
+    [SerializeField] private Transform _bossSpawnPoint;
+    [SerializeField] private float _bossIntroDelay = 1.5f;
+    [SerializeField] private float _reinforcementInitialDelay = 5f;
+    [SerializeField] private float _reinforcementInterval = 12f;
 
     [Header("Stop Block")]
     [SerializeField] private GameObject[] _blocks;
@@ -23,13 +32,18 @@ public class EnemySpawner : MonoBehaviour
     private bool _isChangingWave = false;
     private int _currentWaveIndex = -1;
     private Coroutine _spawnRoutine;
+    private Coroutine _reinforcementRoutine;
+    private Coroutine _bossIntroRoutine;
     private PoolManager _pool;
     private bool _isShuttingDown = false;
     private bool _hasStarted = false;
     private Transform _target;
+    private EnemyBase _spawnedBoss;
     private readonly List<EnemyBase> _spawnedEnemies = new();
 
     public bool HasStarted => _hasStarted;
+
+    public event Action<EnemySpawner> OnBossEncounterCleared;
 
     private void Awake()
     {
@@ -40,15 +54,14 @@ public class EnemySpawner : MonoBehaviour
     private void Start()
     {
         if (_autoStart)
-        {
             StartFirstWave();
-        }
     }
 
     private void OnDestroy()
     {
         _isShuttingDown = true;
         ClearWaveRoutine();
+        UnsubscribeBoss();
         UnsubscribeAllEnemies();
     }
 
@@ -56,12 +69,13 @@ public class EnemySpawner : MonoBehaviour
     {
         _target = target;
 
+        if (_spawnedBoss != null)
+            _spawnedBoss.SetTarget(_target);
+
         for (int i = 0; i < _spawnedEnemies.Count; i++)
         {
             if (_spawnedEnemies[i] != null)
-            {
                 _spawnedEnemies[i].SetTarget(_target);
-            }
         }
     }
 
@@ -86,9 +100,7 @@ public class EnemySpawner : MonoBehaviour
                 continue;
 
             if (waveData.enemyPrefabs.Count > maxCount)
-            {
                 maxCount = waveData.enemyPrefabs.Count;
-            }
         }
 
         return maxCount;
@@ -109,13 +121,18 @@ public class EnemySpawner : MonoBehaviour
         if (_isShuttingDown || !this)
             return;
 
-        if (_blocks != null)
+        SetBlocksActive(true);
+
+        if (_isBossRoom)
         {
-            for (int i = 0; i < _blocks.Length; i++)
+            if (_bossIntroRoutine != null)
             {
-                if (_blocks[i] != null)
-                    _blocks[i].SetActive(true);
+                StopCoroutine(_bossIntroRoutine);
+                _bossIntroRoutine = null;
             }
+
+            _bossIntroRoutine = StartCoroutine(CoStartBossEncounter());
+            return;
         }
 
         if (_waveDatas == null || _waveDatas.Count == 0)
@@ -127,6 +144,111 @@ public class EnemySpawner : MonoBehaviour
         StartWave(0);
     }
 
+    private IEnumerator CoStartBossEncounter()
+    {
+        SpawnBoss();
+
+        if (_spawnedBoss == null)
+        {
+            _bossIntroRoutine = null;
+            yield break;
+        }
+
+        _spawnedBoss.SetTarget(null);
+
+        if (_bossIntroDelay > 0f)
+            yield return new WaitForSeconds(_bossIntroDelay);
+
+        if (_isShuttingDown || !this || _spawnedBoss == null || _spawnedBoss.IsDead)
+        {
+            _bossIntroRoutine = null;
+            yield break;
+        }
+
+        _spawnedBoss.SetTarget(_target);
+
+        if (_waveDatas != null && _waveDatas.Count > 0)
+        {
+            if (_reinforcementRoutine != null)
+            {
+                StopCoroutine(_reinforcementRoutine);
+                _reinforcementRoutine = null;
+            }
+
+            _reinforcementRoutine = StartCoroutine(CoSpawnBossReinforcements());
+        }
+
+        _bossIntroRoutine = null;
+    }
+
+    private void SpawnBoss()
+    {
+        Transform spawnPoint = _bossSpawnPoint != null ? _bossSpawnPoint : transform;
+        GameObject bossObject;
+
+        if (_pool != null)
+            bossObject = _pool.Get(_bossPrefab.gameObject, spawnPoint.position, spawnPoint.rotation);
+        else
+            bossObject = Instantiate(_bossPrefab.gameObject, spawnPoint.position, spawnPoint.rotation);
+
+        DespawnController despawnController = bossObject.GetComponent<DespawnController>();
+        if (despawnController != null)
+            despawnController.SetMode(E_DespawnMode.ReturnToPool);
+
+        _spawnedBoss = bossObject.GetComponent<EnemyBase>();
+        if (_spawnedBoss == null)
+        {
+            Debug.LogWarning($"{name}: Boss Prefab에 EnemyBase가 없습니다.");
+            return;
+        }
+
+        _spawnedBoss.OnDeathFinished -= HandleBossDeathFinished;
+        _spawnedBoss.OnDeathFinished += HandleBossDeathFinished;
+    }
+
+    private IEnumerator CoSpawnBossReinforcements()
+    {
+        if (_reinforcementInitialDelay > 0f)
+            yield return new WaitForSeconds(_reinforcementInitialDelay);
+
+        while (!_isShuttingDown && this && gameObject.activeInHierarchy)
+        {
+            if (_spawnedBoss == null || _spawnedBoss.IsDead)
+                yield break;
+
+            SO_WaveData waveData = GetRandomReinforcementWave();
+            if (waveData != null)
+                yield return StartCoroutine(CoSpawnWave(waveData));
+
+            if (_reinforcementInterval > 0f)
+                yield return new WaitForSeconds(_reinforcementInterval);
+            else
+                yield return null;
+        }
+
+        _reinforcementRoutine = null;
+    }
+
+    private SO_WaveData GetRandomReinforcementWave()
+    {
+        if (_waveDatas == null || _waveDatas.Count == 0)
+            return null;
+
+        List<SO_WaveData> validWaveDatas = new();
+
+        for (int i = 0; i < _waveDatas.Count; i++)
+        {
+            if (_waveDatas[i] != null)
+                validWaveDatas.Add(_waveDatas[i]);
+        }
+
+        if (validWaveDatas.Count == 0)
+            return null;
+
+        int randomIndex = UnityEngine.Random.Range(0, validWaveDatas.Count);
+        return validWaveDatas[randomIndex];
+    }
+
     private void SortWaveDatas()
     {
         _waveDatas.Sort((a, b) => a.id.CompareTo(b.id));
@@ -134,6 +256,9 @@ public class EnemySpawner : MonoBehaviour
 
     public void StartWave(int waveIndex)
     {
+        if (_isBossRoom)
+            return;
+
         if (_isShuttingDown || !this || !gameObject.activeInHierarchy)
             return;
 
@@ -164,6 +289,9 @@ public class EnemySpawner : MonoBehaviour
         if (_isShuttingDown)
             return false;
 
+        if (_isBossRoom)
+            return false;
+
         if (!_isWaveSpawnCompleted)
             return false;
 
@@ -184,6 +312,9 @@ public class EnemySpawner : MonoBehaviour
 
     public void StartNextWave()
     {
+        if (_isBossRoom)
+            return;
+
         if (_isShuttingDown || !this || !gameObject.activeInHierarchy)
             return;
 
@@ -191,16 +322,7 @@ public class EnemySpawner : MonoBehaviour
 
         if (nextIndex >= _waveDatas.Count)
         {
-            Debug.Log($"{name}: 모든 웨이브 완료");
-
-            for (int i = 0; i < _blocks.Length; i++)
-            {
-                if (_blocks[i] != null)
-                {
-                    _blocks[i].SetActive(false);
-                }
-            }
-
+            SetBlocksActive(false);
             return;
         }
 
@@ -251,6 +373,13 @@ public class EnemySpawner : MonoBehaviour
 
         List<Transform> selectedPoints = GetSpawnPointsForWave(enemyCount);
 
+        if (!_isBossRoom)
+        {
+            _currentWaveKilledCount = 0;
+            _isWaveSpawnCompleted = false;
+            _isChangingWave = false;
+        }
+
         if (waveData.spawnSequentially)
         {
             for (int i = 0; i < enemyCount; i++)
@@ -264,9 +393,7 @@ public class EnemySpawner : MonoBehaviour
                 SpawnEnemy(waveData.enemyPrefabs[i], selectedPoints[i]);
 
                 if (i < enemyCount - 1)
-                {
                     yield return new WaitForSeconds(waveData.spawnInterval);
-                }
             }
         }
         else
@@ -283,8 +410,11 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
-        _isWaveSpawnCompleted = true;
-        _spawnRoutine = null;
+        if (!_isBossRoom)
+        {
+            _isWaveSpawnCompleted = true;
+            _spawnRoutine = null;
+        }
     }
 
     private void SpawnEnemy(GameObject enemyPrefab, Transform spawnPoint)
@@ -298,19 +428,13 @@ public class EnemySpawner : MonoBehaviour
         GameObject enemyObject;
 
         if (_pool != null)
-        {
             enemyObject = _pool.Get(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
-        }
         else
-        {
             enemyObject = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
-        }
 
         DespawnController despawnController = enemyObject.GetComponent<DespawnController>();
         if (despawnController != null)
-        {
             despawnController.SetMode(E_DespawnMode.ReturnToPool);
-        }
 
         EnemyBase enemyBase = enemyObject.GetComponent<EnemyBase>();
         if (enemyBase != null)
@@ -320,9 +444,7 @@ public class EnemySpawner : MonoBehaviour
             enemyBase.OnDeathFinished += HandleEnemyDeathFinished;
 
             if (!_spawnedEnemies.Contains(enemyBase))
-            {
                 _spawnedEnemies.Add(enemyBase);
-            }
         }
     }
 
@@ -332,23 +454,37 @@ public class EnemySpawner : MonoBehaviour
 
         for (int i = 0; i < shuffled.Count; i++)
         {
-            int randomIndex = Random.Range(i, shuffled.Count);
+            int randomIndex = UnityEngine.Random.Range(i, shuffled.Count);
             (shuffled[i], shuffled[randomIndex]) = (shuffled[randomIndex], shuffled[i]);
         }
 
         if (enemyCount <= shuffled.Count)
-        {
             return shuffled.GetRange(0, enemyCount);
-        }
 
         List<Transform> result = new List<Transform>(enemyCount);
 
         for (int i = 0; i < enemyCount; i++)
-        {
             result.Add(shuffled[i % shuffled.Count]);
-        }
 
         return result;
+    }
+
+    private void HandleBossDeathFinished(EnemyBase boss)
+    {
+        if (_isShuttingDown || !this)
+            return;
+
+        ClearWaveRoutine();
+
+        if (_spawnedBoss != null)
+        {
+            _spawnedBoss.OnDeathFinished -= HandleBossDeathFinished;
+            _spawnedBoss = null;
+        }
+
+        ClearRemainingEnemies();
+        SetBlocksActive(false);
+        OnBossEncounterCleared?.Invoke(this);
     }
 
     private void HandleEnemyDeathFinished(EnemyBase enemy)
@@ -362,6 +498,9 @@ public class EnemySpawner : MonoBehaviour
             _spawnedEnemies.Remove(enemy);
         }
 
+        if (_isBossRoom)
+            return;
+
         if (_isChangingWave)
             return;
 
@@ -374,17 +513,55 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
+    private void ClearRemainingEnemies()
+    {
+        for (int i = _spawnedEnemies.Count - 1; i >= 0; i--)
+        {
+            EnemyBase enemy = _spawnedEnemies[i];
+            if (enemy == null)
+                continue;
+
+            enemy.OnDeathFinished -= HandleEnemyDeathFinished;
+
+            if (_pool != null)
+                _pool.Return(enemy.gameObject);
+            else
+                Destroy(enemy.gameObject);
+        }
+
+        _spawnedEnemies.Clear();
+    }
+
+    private void UnsubscribeBoss()
+    {
+        if (_spawnedBoss != null)
+        {
+            _spawnedBoss.OnDeathFinished -= HandleBossDeathFinished;
+            _spawnedBoss = null;
+        }
+    }
+
     private void UnsubscribeAllEnemies()
     {
         for (int i = 0; i < _spawnedEnemies.Count; i++)
         {
             if (_spawnedEnemies[i] != null)
-            {
                 _spawnedEnemies[i].OnDeathFinished -= HandleEnemyDeathFinished;
-            }
         }
 
         _spawnedEnemies.Clear();
+    }
+
+    private void SetBlocksActive(bool isActive)
+    {
+        if (_blocks == null)
+            return;
+
+        for (int i = 0; i < _blocks.Length; i++)
+        {
+            if (_blocks[i] != null)
+                _blocks[i].SetActive(isActive);
+        }
     }
 
     public void ClearWaveRoutine()
@@ -393,6 +570,18 @@ public class EnemySpawner : MonoBehaviour
         {
             StopCoroutine(_spawnRoutine);
             _spawnRoutine = null;
+        }
+
+        if (_reinforcementRoutine != null)
+        {
+            StopCoroutine(_reinforcementRoutine);
+            _reinforcementRoutine = null;
+        }
+
+        if (_bossIntroRoutine != null)
+        {
+            StopCoroutine(_bossIntroRoutine);
+            _bossIntroRoutine = null;
         }
     }
 }

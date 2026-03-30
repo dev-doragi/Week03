@@ -7,6 +7,8 @@ public class CameraShakeModule : MonoBehaviour
     [SerializeField] private float _frequency = 25f;    // 진동 속도
     [SerializeField] private float _baseAmplitude = 0.2f; // 기본 진폭
 
+    public static CameraShakeModule Instance { get; private set; }
+
     private float _timer;
     private float _shakeDuration;
     private float _currentAmplitude;
@@ -15,8 +17,17 @@ public class CameraShakeModule : MonoBehaviour
 
     private void Awake()
     {
-        // 타겟 미지정 시 본인 Transform 사용
-        if (_target == null) _target = transform;
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
+        if (_target == null)
+            _target = transform;
+
         _initialLocalPos = _target.localPosition;
     }
 

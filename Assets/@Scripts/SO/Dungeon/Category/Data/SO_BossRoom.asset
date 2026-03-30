@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SO_BossRoom
   m_EditorClassIdentifier: Assembly-CSharp::BasicRoomAssignerSO
   _targetRoomType: 5
-  _selectPolicy: 5
+  _selectPolicy: 4
   _minRoomSize: {x: 17, y: 17}
   _maxRoomSize: {x: 17, y: 17}
   _excludeStartRoom: 1

@@ -13,17 +13,15 @@ MonoBehaviour:
   m_Name: SO_Chest
   m_EditorClassIdentifier: Assembly-CSharp::PropPlacementSO
   _prefabs:
-  - {fileID: 4162892939076458251, guid: 4876085bf0394844aab3456a734ef9c9, type: 3}
-  - {fileID: 4162892939076458251, guid: 90bc45909cb11924b9f7b29f89443b01, type: 3}
-  - {fileID: 4162892939076458251, guid: 91e29b7267fceb8469c4636312dc97bb, type: 3}
+  - {fileID: 5977386730531592527, guid: da2821c7d8a8804489e0234f297c5597, type: 3}
   _upperWallPrefabs: []
   _lowerWallPrefabs: []
   _leftWallPrefabs: []
   _rightWallPrefabs: []
   _footprint: {x: 1, y: 1}
-  _placementMode: 4
-  _allowedRoomTypes: 01000000
+  _placementMode: 2
+  _allowedRoomTypes: 02000000
   _maxPerRoom: 1
-  _maxPerDungeon: 3
+  _maxPerDungeon: 2
   _minSpacing: 0
   _spawnChance: 1

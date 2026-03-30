@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 12282701}
   - component: {fileID: 12282700}
   m_Layer: 5
-  m_Name: GuideButton
+  m_Name: TutorialButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -156,7 +156,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 600, y: 80}
+  m_SizeDelta: {x: 335, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &12282700
 MonoBehaviour:
@@ -177,7 +177,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.46751517, g: 0.8989987, b: 0.9622642, a: 1}
@@ -187,9 +187,9 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
+    m_HighlightedSprite: {fileID: 228940821244427079, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+    m_PressedSprite: {fileID: -65408208, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+    m_SelectedSprite: {fileID: 228940821244427079, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -198,7 +198,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 12282701}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -222,8 +222,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 491487227, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -277,7 +277,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 600, y: 80}
+  m_SizeDelta: {x: 335, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &56376130
 MonoBehaviour:
@@ -298,7 +298,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.46751517, g: 0.8989987, b: 0.9622642, a: 1}
@@ -308,9 +308,9 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
+    m_HighlightedSprite: {fileID: 228940821244427079, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+    m_PressedSprite: {fileID: -65408208, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+    m_SelectedSprite: {fileID: 228940821244427079, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -319,7 +319,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 56376131}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -343,8 +343,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 491487227, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -717,7 +717,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -200}
-  m_SizeDelta: {x: 909.5325, y: 184.43768}
+  m_SizeDelta: {x: 1500, y: 184.4377}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &659599984
 MonoBehaviour:
@@ -739,7 +739,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: GAME TITLE
+  m_text: ENTER THE DUNGEON
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f055484ff575d4792183b0f87b2714, type: 2}
   m_sharedMaterial: {fileID: 517332483471463887, guid: c3f055484ff575d4792183b0f87b2714, type: 2}
@@ -993,7 +993,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 600, y: 80}
+  m_SizeDelta: {x: 335, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &812197679
 MonoBehaviour:
@@ -1014,7 +1014,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.46751517, g: 0.8989987, b: 0.9622642, a: 1}
@@ -1024,9 +1024,9 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
+    m_HighlightedSprite: {fileID: 228940821244427079, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+    m_PressedSprite: {fileID: -65408208, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+    m_SelectedSprite: {fileID: 228940821244427079, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -1035,7 +1035,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 812197680}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -1059,8 +1059,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 491487227, guid: d08aa5fde4ccb8f4fb27eeb7147c1abd, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1226,7 +1226,7 @@ GameObject:
   - component: {fileID: 1514324414}
   - component: {fileID: 1514324413}
   m_Layer: 5
-  m_Name: GuideButtonText
+  m_Name: TutorialButtonText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1271,7 +1271,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: GUIDE
+  m_text: TUTORIAL
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f055484ff575d4792183b0f87b2714, type: 2}
   m_sharedMaterial: {fileID: 517332483471463887, guid: c3f055484ff575d4792183b0f87b2714, type: 2}

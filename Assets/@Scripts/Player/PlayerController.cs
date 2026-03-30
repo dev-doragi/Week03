@@ -197,7 +197,7 @@ public class PlayerController : MonoBehaviour
 
         GameState currentState = gameStateManager.CurrentState;
 
-        if (currentState == GameState.GameOver)
+        if (currentState == GameState.GameOver || currentState == GameState.Clear)
             return;
 
         if (currentState == GameState.Playing)

@@ -7,6 +7,7 @@ public class UIManager : MonoBehaviour, IInitializable
     [Header("Overlay Panels")]
     [SerializeField] private UI_Pause _uiPausePanel;
     [SerializeField] private UI_GameOver _uiGameOverPanel;
+    [SerializeField] private UI_Clear _uiClearPanel;
 
     [Header("HUD")]
     [SerializeField] private UI_HUD _uiHud;
@@ -33,6 +34,7 @@ public class UIManager : MonoBehaviour, IInitializable
     {
         _uiPausePanel = FindAnyObjectByType<UI_Pause>(FindObjectsInactive.Include);
         _uiGameOverPanel = FindAnyObjectByType<UI_GameOver>(FindObjectsInactive.Include);
+        _uiClearPanel = FindAnyObjectByType<UI_Clear>(FindObjectsInactive.Include);
         _uiHud = FindAnyObjectByType<UI_HUD>(FindObjectsInactive.Include);
 
         HideOverlayPanels();
@@ -64,6 +66,10 @@ public class UIManager : MonoBehaviour, IInitializable
                 ShowGameOver();
                 break;
 
+            case GameState.Clear:
+                ShowClear();
+                break;
+
             default:
                 HideOverlayPanels();
                 break;
@@ -80,6 +86,9 @@ public class UIManager : MonoBehaviour, IInitializable
 
         if (_uiGameOverPanel != null)
             _uiGameOverPanel.gameObject.SetActive(false);
+
+        if (_uiClearPanel != null)
+            _uiClearPanel.gameObject.SetActive(false);
     }
 
     public void ShowGameOver()
@@ -92,6 +101,24 @@ public class UIManager : MonoBehaviour, IInitializable
 
         if (_uiPausePanel != null)
             _uiPausePanel.gameObject.SetActive(false);
+
+        if (_uiClearPanel != null)
+            _uiClearPanel.gameObject.SetActive(false);
+    }
+
+    public void ShowClear()
+    {
+        if (_uiClearPanel != null)
+        {
+            _uiClearPanel.gameObject.SetActive(true);
+            _uiClearPanel.ApplyFirstSelection();
+        }
+
+        if (_uiPausePanel != null)
+            _uiPausePanel.gameObject.SetActive(false);
+
+        if (_uiGameOverPanel != null)
+            _uiGameOverPanel.gameObject.SetActive(false);
     }
 
     public void HideOverlayPanels()
@@ -101,6 +128,9 @@ public class UIManager : MonoBehaviour, IInitializable
 
         if (_uiGameOverPanel != null)
             _uiGameOverPanel.gameObject.SetActive(false);
+
+        if (_uiClearPanel != null)
+            _uiClearPanel.gameObject.SetActive(false);
     }
 
     private void OnDestroy()

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fef0a6249324994aa7b7565167acdf4, type: 3}
   m_Name: SO_MeleeEnemy03
   m_EditorClassIdentifier: Assembly-CSharp::SO_MeleeEnemyData
-  _maxHp: 3
+  _maxHp: 2
   _attackDamage: 1
-  _moveSpeed: 6
+  _moveSpeed: 5
   _detectionRange: 16
   _attackRange: 1.5
   _attackCooldown: 0.1
@@ -27,12 +27,12 @@ MonoBehaviour:
     m_Bits: 128
   _separationRadius: 0.7
   _separationWeight: 0.8
-  _hitSprite: {fileID: 5687384418654495435, guid: 49a2636ed37b029479740b355be02b49, type: 3}
-  _deathSprite: {fileID: -6276622676809764335, guid: 49a2636ed37b029479740b355be02b49, type: 3}
+  _hitSprite: {fileID: -1671772389, guid: 84623e29596903f41b967eb18e7353fa, type: 3}
+  _deathSprite: {fileID: 363445552, guid: 84623e29596903f41b967eb18e7353fa, type: 3}
   _hitSpriteDuration: 0.08
   _flipThreshold: 0.01
   _attackRadius: 0.75
-  _attackWindup: 0.1
+  _attackWindup: 0.4
   _targetMask:
     serializedVersion: 2
     m_Bits: 8

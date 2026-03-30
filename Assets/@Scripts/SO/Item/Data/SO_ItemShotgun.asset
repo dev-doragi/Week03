@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: SO_ItemShotgun
   m_EditorClassIdentifier: Assembly-CSharp::SO_ItemData
   <WeaponData>k__BackingField: {fileID: 11400000, guid: 23e3f26d4d48e4b41b931739a0cfac45, type: 2}
-  <NormalSprite>k__BackingField: {fileID: -508508718728349100, guid: 15ddc3a0a1842da4bbefe52f7470d6e5, type: 3}
-  <OutlineSprite>k__BackingField: {fileID: -156750005927826490, guid: 15ddc3a0a1842da4bbefe52f7470d6e5, type: 3}
+  <NormalSprite>k__BackingField: {fileID: -8909765549828569010, guid: 15ddc3a0a1842da4bbefe52f7470d6e5, type: 3}
+  <OutlineSprite>k__BackingField: {fileID: 4266876228782321393, guid: 15ddc3a0a1842da4bbefe52f7470d6e5, type: 3}
   <InteractionMessage>k__BackingField: "\uC90D\uAE30"

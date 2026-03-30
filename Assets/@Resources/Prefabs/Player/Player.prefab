@@ -89,7 +89,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 50
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
@@ -207,6 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aff2d476da057724e917610d7e6179d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
+  _invincibleLayer: Invincible
   _movementData: {fileID: 11400000, guid: 6d24ca1cd47e56b44b8322098ee96ff6, type: 2}
 --- !u!114 &5563874219412725588
 MonoBehaviour:
@@ -285,6 +286,7 @@ MonoBehaviour:
   _maxHp: 3
   _currentHp: 0
   _invincibleDuration: 1.5
+  _invincibleLayer: Invincible
   _spriteRenderer: {fileID: 2162814907605461657}
   _hitColor: {r: 1, g: 1, b: 1, a: 1}
   _hitFlashDuration: 0.1
@@ -319,6 +321,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1a50903cb719164b8642f2fdd1b510f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
+  _interactionRange: 1.5
+  _interactableLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  _detectionOrigin: {fileID: 2710113954224840486}
+  _promptUI: {fileID: 0}
 --- !u!1 &8059926379864360768
 GameObject:
   m_ObjectHideFlags: 0

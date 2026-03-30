@@ -5,22 +5,26 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCombat : MonoBehaviour
 {
-    [SerializeField] private Transform _weaponHoldPoint; // 무기 프리팹이 생성될 부모 트랜스폼
+    private const float INITIAL_LAST_ATTACK_TIME = -100f;
+    private const int PROJECTILE_POOL_SIZE = 30;
+
+    [SerializeField] private Transform _weaponHoldPoint;
     [SerializeField] private CameraShakeModule _cameraShake;
 
     [Header("Starting Weapon")]
-    [SerializeField] private WeaponSO _startingWeapon; // 인스펙터에서 할당할 기본 무기 SO
+    [SerializeField] private WeaponSO _startingWeapon;
 
     private WeaponSO _weaponData;
-    private Transform _muzzle; // 생성된 프리팹에서 추출할 총구 위치
+    private Transform _muzzle;
     private GameObject _currentWeaponInstance;
 
     private PlayerController _controller;
-    private float _lastAttackTime = -100f;
+    private PoolManager _poolManager;
+
+    private float _lastAttackTime = INITIAL_LAST_ATTACK_TIME;
     private int _currentAmmo;
     private bool _isReloading;
     private Coroutine _reloadRoutine;
-    private PoolManager _poolManager;
 
     public WeaponSO WeaponData => _weaponData;
     public int CurrentAmmo => _currentAmmo;
@@ -38,71 +42,65 @@ public class PlayerCombat : MonoBehaviour
 
     private void Start()
     {
-        // 게임 시작 시 인스펙터에 할당된 SO가 있다면 장착 처리
         if (_startingWeapon != null)
-        {
             EquipWeapon(_startingWeapon);
-        }
+        else
+            InitializeAmmo();
     }
 
     private void OnDisable()
     {
-        if (_reloadRoutine != null)
-        {
-            StopCoroutine(_reloadRoutine);
-            _reloadRoutine = null;
-        }
-
-        _isReloading = false;
+        StopReloadRoutine();
     }
 
-    // 무기 장착 및 교체 로직
     public void EquipWeapon(WeaponSO newWeapon)
     {
-        if (newWeapon == null) return;
+        if (newWeapon == null)
+            return;
+
+        StopReloadRoutine();
 
         _weaponData = newWeapon;
+        _lastAttackTime = INITIAL_LAST_ATTACK_TIME;
 
-        // 기존 장착된 무기 객체 제거
-        if (_currentWeaponInstance != null)
-        {
-            Destroy(_currentWeaponInstance);
-        }
-
-        // 새 무기 프리팹 생성 및 초기화
-        if (_weaponData.WeaponPrefab != null && _weaponHoldPoint != null)
-        {
-            _currentWeaponInstance = Instantiate(_weaponData.WeaponPrefab, _weaponHoldPoint, false);
-
-            WeaponVisual visual = _currentWeaponInstance.GetComponent<WeaponVisual>();
-            if (visual != null)
-            {
-                _muzzle = visual.MuzzleTransform;
-            }
-            else
-            {
-                Debug.LogWarning("Weapon 프리팹에 WeaponVisual 스크립트가 없습니다.");
-                _muzzle = _currentWeaponInstance.transform; // Fallback
-            }
-        }
-
-        // 새 무기의 투사체 풀링 초기화
-        if (_poolManager != null && _weaponData.ProjectilePrefab != null)
-        {
-            _poolManager.CreatePool(_weaponData.ProjectilePrefab, 30);
-        }
-
+        RebuildWeaponInstance();
+        EnsureProjectilePool();
         InitializeAmmo();
+    }
+
+    public void ResetForNewRun()
+    {
+        StopReloadRoutine();
+        _lastAttackTime = INITIAL_LAST_ATTACK_TIME;
+
+        if (_startingWeapon != null)
+        {
+            EquipWeapon(_startingWeapon);
+            return;
+        }
+
+        ClearCurrentWeaponInstance();
+        _weaponData = null;
+        _currentAmmo = 0;
+
+        OnAmmoChanged?.Invoke(0, 0);
+        OnReloadStateChanged?.Invoke(false);
     }
 
     public void InitializeAmmo()
     {
+        StopReloadRoutine();
+        _lastAttackTime = INITIAL_LAST_ATTACK_TIME;
+
         if (_weaponData == null)
+        {
+            _currentAmmo = 0;
+            OnAmmoChanged?.Invoke(0, 0);
+            OnReloadStateChanged?.Invoke(false);
             return;
+        }
 
         _currentAmmo = _weaponData.MaxAmmo;
-        _isReloading = false;
-
         OnAmmoChanged?.Invoke(_currentAmmo, _weaponData.MaxAmmo);
         OnReloadStateChanged?.Invoke(false);
     }
@@ -112,7 +110,10 @@ public class PlayerCombat : MonoBehaviour
         if (_weaponData == null)
             return;
 
-        if (_muzzle == null || _weaponData.ProjectilePrefab == null)
+        if (_muzzle == null)
+            return;
+
+        if (_weaponData.ProjectilePrefab == null)
             return;
 
         if (_poolManager == null)
@@ -203,21 +204,97 @@ public class PlayerCombat : MonoBehaviour
                 : UnityEngine.Random.Range(-_weaponData.SpreadAngle, _weaponData.SpreadAngle);
 
             float finalAngle = baseAngle + angleOffset;
-            float rad = finalAngle * Mathf.Deg2Rad;
-            Vector2 direction = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+            float radian = finalAngle * Mathf.Deg2Rad;
+            Vector2 direction = new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
 
-            // 투사체를 WeaponSO에 정의된 프리팹으로 생성
-            GameObject projectileObject = _poolManager.Get(_weaponData.ProjectilePrefab, _muzzle.position, Quaternion.Euler(0f, 0f, finalAngle));
+            GameObject projectileObject = _poolManager.Get(
+                _weaponData.ProjectilePrefab,
+                _muzzle.position,
+                Quaternion.Euler(0f, 0f, finalAngle));
+
+            if (projectileObject == null)
+                continue;
 
             PlayerProjectile projectile = projectileObject.GetComponent<PlayerProjectile>();
-            if (projectile != null)
-            {
-                projectile.Initialize(
-                    direction,
-                    _weaponData.ProjectileSpeed,
-                    _weaponData.ProjectileLifetime,
-                    _weaponData.Damage);
-            }
+            if (projectile == null)
+                continue;
+
+            projectile.Initialize(
+                direction,
+                _weaponData.ProjectileSpeed,
+                _weaponData.ProjectileLifetime,
+                _weaponData.Damage);
         }
+    }
+
+    private void RebuildWeaponInstance()
+    {
+        ClearCurrentWeaponInstance();
+
+        if (_weaponData == null)
+        {
+            _muzzle = GetDefaultMuzzle();
+            return;
+        }
+
+        if (_weaponData.WeaponPrefab == null || _weaponHoldPoint == null)
+        {
+            _muzzle = GetDefaultMuzzle();
+            return;
+        }
+
+        _currentWeaponInstance = Instantiate(_weaponData.WeaponPrefab, _weaponHoldPoint, false);
+
+        WeaponVisual visual = _currentWeaponInstance.GetComponent<WeaponVisual>();
+        if (visual != null && visual.MuzzleTransform != null)
+            _muzzle = visual.MuzzleTransform;
+        else
+            _muzzle = _currentWeaponInstance.transform;
+    }
+
+    private void ClearCurrentWeaponInstance()
+    {
+        if (_currentWeaponInstance != null)
+            Destroy(_currentWeaponInstance);
+
+        _currentWeaponInstance = null;
+        _muzzle = null;
+    }
+
+    private void EnsureProjectilePool()
+    {
+        if (_poolManager == null)
+            return;
+
+        if (_weaponData == null)
+            return;
+
+        if (_weaponData.ProjectilePrefab == null)
+            return;
+
+        _poolManager.CreatePool(_weaponData.ProjectilePrefab, PROJECTILE_POOL_SIZE);
+    }
+
+    private void StopReloadRoutine()
+    {
+        if (_reloadRoutine != null)
+        {
+            StopCoroutine(_reloadRoutine);
+            _reloadRoutine = null;
+        }
+
+        if (_isReloading)
+        {
+            _isReloading = false;
+            OnReloadStateChanged?.Invoke(false);
+        }
+    }
+
+    private Transform GetDefaultMuzzle()
+    {
+        if (_weaponHoldPoint != null)
+            return _weaponHoldPoint;
+
+        return transform;
     }
 }

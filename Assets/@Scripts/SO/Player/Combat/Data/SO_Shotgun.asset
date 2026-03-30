@@ -16,9 +16,9 @@ MonoBehaviour:
   <Damage>k__BackingField: 1
   <ProjectileSpeed>k__BackingField: 8
   <ProjectileLifetime>k__BackingField: 1
-  <MaxAmmo>k__BackingField: 5
+  <MaxAmmo>k__BackingField: 3
   <ReloadDuration>k__BackingField: 1.75
   <ProjectilePrefab>k__BackingField: {fileID: 5659828644058746940, guid: ab833ea123f49a741b8a6fdc1440e197, type: 3}
-  <SpreadAngle>k__BackingField: 35
-  <PelletCount>k__BackingField: 7
+  <SpreadAngle>k__BackingField: 40
+  <PelletCount>k__BackingField: 8
   <WeaponPrefab>k__BackingField: {fileID: 7553991377772159881, guid: 3244e419248d3a24687d9dfd3cc8dcfe, type: 3}

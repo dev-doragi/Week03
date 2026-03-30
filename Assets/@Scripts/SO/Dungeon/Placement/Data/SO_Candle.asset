@@ -15,22 +15,14 @@ MonoBehaviour:
   _prefabs:
   - {fileID: 4162892939076458251, guid: 469872afbc26c804b839f21a458aad39, type: 3}
   - {fileID: 4162892939076458251, guid: cea1050287fc60346a2c3f37fcc201ae, type: 3}
+  _upperWallPrefabs: []
+  _lowerWallPrefabs: []
+  _leftWallPrefabs: []
+  _rightWallPrefabs: []
   _footprint: {x: 1, y: 1}
   _placementMode: 0
   _allowedRoomTypes: 
-  _maxPerRoom: 1
-  _maxPerDungeon: 10
+  _maxPerRoom: 2
+  _maxPerDungeon: 24
   _minSpacing: 0
   _spawnChance: 1
-  _canPlaceOnCorner: 0
-  _canPlaceOnUpperWall: 1
-  _canPlaceOnLowerWall: 0
-  _canPlaceOnLeftWall: 1
-  _canPlaceOnRightWall: 0
-  _canPlaceInsideRoom: 0
-  _placementQuantityMin: 1
-  _placementQuantityMax: 1
-  _placeAsGroup: 0
-  _groupMinCount: 1
-  _groupMaxCount: 1
-  _groupSearchOffset: 1

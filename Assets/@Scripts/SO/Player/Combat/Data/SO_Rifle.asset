@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4677ceca549c6d429a043aae74afab8, type: 3}
   m_Name: SO_Rifle
   m_EditorClassIdentifier: Assembly-CSharp::WeaponSO
-  <AttackInterval>k__BackingField: 2
-  <Damage>k__BackingField: 3
+  <AttackInterval>k__BackingField: 1.3
+  <Damage>k__BackingField: 7
   <ProjectileSpeed>k__BackingField: 20
   <ProjectileLifetime>k__BackingField: 4
-  <MaxAmmo>k__BackingField: 3
+  <MaxAmmo>k__BackingField: 5
   <ReloadDuration>k__BackingField: 1.2
   <ProjectilePrefab>k__BackingField: {fileID: 5659828644058746940, guid: 30b8c9cd0c85fc1469becaab04a5223e, type: 3}
   <SpreadAngle>k__BackingField: 0
